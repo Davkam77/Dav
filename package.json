@@ -1,0 +1,23 @@
+{
+  "name": "freelance-monitor",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000D\u0000a\u0000v\u0000\r\u0000 \u0000#\u0000 \u0000D\u0000a\u0000v\u0000k\u0000a\u0000\r\u0000 \u0000#\u0000 \u0000D\u0000a\u0000v\u0000k\u0000a\u0000\r\u0000 \u0000#\u0000 \u0000D\u0000a\u0000v\u0000k\u0000a\u0000\r\u0000 \u0000",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Davkam77/Dav.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Davkam77/Dav/issues"
+  },
+  "homepage": "https://github.com/Davkam77/Dav#readme",
+  "dependencies": {
+    "axios": "^1.9.0"
+  }
+}

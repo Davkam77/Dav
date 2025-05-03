@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Вход в систему">
+    <title>Вход в систему</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <!-- Уведомления -->
+    <div id="toast-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="toast {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Основной контент -->
+    <div class="login-wrapper">
+        <h1 class="glow">Вход в систему</h1>
+        <form method="post" action="/auth/login" class="login-form fade-in">
+            <h2>Авторизация</h2>
+            <label for="username" class="visually-hidden">Имя пользователя</label>
+            <input type="text" id="username" name="username" placeholder="Имя пользователя" required>
+            <label for="password" class="visually-hidden">Пароль</label>
+            <input type="password" id="password" name="password" placeholder="Пароль" required>
+            <button type="submit">Войти</button>
+            <p>
+                <a href="{{ url_for('users.register') }}" class="card-link">Нет аккаунта? Зарегистрироваться</a>
+            </p>
+        </form>
+    </div>
+
+   
+
+    <!-- Скрипты -->
+    <script>
+        const joystick = document.getElementById('joystick');
+        const joystickContainer = document.getElementById('joystick-container');
+        let isDragging = false;
+
+        joystick.addEventListener('mousedown', startDragging);
+        joystick.addEventListener('touchstart', startDragging);
+        document.addEventListener('mousemove', moveJoystick);
+        document.addEventListener('touchmove', moveJoystick);
+        document.addEventListener('mouseup', stopDragging);
+        document.addEventListener('touchend', stopDragging);
+
+        function startDragging(e) {
+            isDragging = true;
+            e.preventDefault();
+        }
+
+        function moveJoystick(e) {
+            if (!isDragging) return;
+
+            const rect = joystickContainer.getBoundingClientRect();
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            let x, y;
+
+            if (e.type === 'touchmove') {
+                x = e.touches[0].clientX - rect.left;
+                y = e.touches[0].clientY - rect.top;
+            } else {
+                x = e.clientX - rect.left;
+                y = e.clientY - rect.top;
+            }
+
+            const maxDistance = rect.width / 2 - joystick.offsetWidth / 2;
+            const dx = Math.max(-maxDistance, Math.min(maxDistance, x - centerX));
+            const dy = Math.max(-maxDistance, Math.min(maxDistance, y - centerY));
+
+            joystick.style.transform = `translate(${dx}px, ${dy}px)`;
+        }
+
+        function stopDragging() {
+            isDragging = false;
+            joystick.style.transform = 'translate(0, 0)';
+        }
+    </script>
+</body>
+</html>

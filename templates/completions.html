@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>🏁 Завершённые Задания</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Rubik&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+</head>
+<body>
+    <!-- Кнопка бургер-меню -->
+    <button class="menu-toggle">☰</button>
+
+    <!-- Боковое меню -->
+    <nav id="sideMenu" class="side-menu">
+        <button class="menu-close">✖</button>
+        <ul>
+            <li><a href="/index">🏠 Главная</a></li>
+            <li><a href="/favorites">⭐ Избранные</a></li>
+            <li><a href="/my_tasks">🧰 Мои задания</a></li>
+            <li><a href="/completions">✅ Завершение</a></li>
+            <li><a href="/logout">🚪 Выйти</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h2>🏁 Завершённые задания</h2>
+
+        {% if tasks %}
+            {% for task in tasks %}
+                <div class="card" data-task-id="{{ task.id }}">
+                    <h3>{{ task.title or "Без названия" }}</h3>
+                    <p>{{ task.description[:200] }}...</p>
+                    <p class="status-completed">Статус: Завершено</p>
+                    <small>📅 Задание ID: {{ task.id }}</small>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-tasks">Пока нет завершённых заданий.</p>
+        {% endif %}
+    </div>
+
+    <script>
+        const socket = io();
+
+        socket.on('task_completed', (task) => {
+            const container = document.querySelector('.container');
+            const noTasks = document.querySelector('.no-tasks');
+            if (noTasks) {
+                noTasks.remove();
+            }
+
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.setAttribute('data-task-id', task.id);
+            card.innerHTML = `
+                <h3>${task.title || 'Без названия'}</h3>
+                <p>${(task.description || '').slice(0, 200)}...</p>
+                <p class="status-completed">Статус: Завершено</p>
+                <small>📅 Задание ID: ${task.id}</small>
+            `;
+            container.appendChild(card);
+        });
+
+        function toggleMenu() {
+            const menu = document.getElementById('sideMenu');
+            const toggle = document.querySelector('.menu-toggle');
+            menu.classList.toggle('open');
+            toggle.style.transform = menu.classList.contains('open') ? 'rotate(90deg)' : 'rotate(0deg)';
+        }
+    </script>
+</body>
+</html>

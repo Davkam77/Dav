@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>👷 Мои Задания</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body style="background: url('{{ background }}') no-repeat center center fixed; background-size: cover;">
+    <!-- Кнопка бургер-меню -->
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+
+    <!-- Боковое меню -->
+    <nav id="sideMenu" class="side-menu">
+        <ul>
+            <li><a href="/index">🏠 Главная</a></li>
+            <li><a href="/favorites">⭐ Избранные</a></li>
+            <li><a href="/my_tasks">🧰 Мои задания</a></li>
+            <li><a href="/completions">✅ Завершение</a></li>
+            <li><a href="/logout">🚪 Выйти</a></li>
+        </ul>
+    </nav>
+
+    <!-- Контейнер для уведомлений -->
+    <div id="toast-container"></div>
+
+    <!-- Основной контент -->
+    <div class="content-wrapper">
+        <h2 class="glow">👷 Мои задания</h2>
+
+        {% for task in tasks %}
+        <div class="task-card fade-in">
+            <h3>{{ task.title }}</h3>
+            <p>{{ task.description[:200] }}...</p>
+            <p class="task-status">
+                <b>Статус:</b>
+                {% if task.status == 'in_progress' %}
+                    <span class="status-in-progress">В работе</span>
+                    <a href="/task/complete/{{ task.id }}" class="task-action complete">🏁 Завершить</a>
+                {% elif task.status == 'done' %}
+                    <span class="status-done">Завершено</span>
+                {% else %}
+                    <span class="status-unknown">Неизвестно</span>
+                {% endif %}
+            </p>
+            <p class="task-id">📅 Задание ID: {{ task.id }}</p>
+            {% if task.link %}
+                <a href="{{ task.link }}" target="_blank" class="task-link">🔗 Перейти к заказу</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <!-- AI Обработка -->
+        <div id="aiBlock" class="fade-in">
+            <h2>🦖 Обработка заказа</h2>
+            <textarea id="inputTextMyTasks" placeholder="Введите запрос для обработки..."></textarea>
+            <button onclick="simplifyMyTasks()">🔧 Упростить</button>
+            <div id="resultBlockMyTasks">
+                <h3>Результат:</h3>
+                <div id="resultMyTasks">Результат будет показан здесь...</div>
+                <button onclick="copyResultMyTasks()" class="copy-button">📋 Копировать</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Аудио для уведомлений -->
+    <audio id="notificationSound" src="{{ url_for('static', filename='notification.mp3') }}" preload="auto"></audio>
+
+    <!-- JavaScript -->
+    <script>
+        function toggleMenu() {
+            const menu = document.getElementById("sideMenu");
+            const toggle = document.querySelector(".menu-toggle");
+            menu.classList.toggle("open");
+            toggle.style.transform = menu.classList.contains("open") ? "rotate(90deg)" : "rotate(0deg)";
+        }
+
+        function showToast(message, type = "success") {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            toast.className = `toast ${type}`;
+            toast.innerText = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add("fade-out"), 3000);
+            setTimeout(() => container.removeChild(toast), 4000);
+            const sound = document.getElementById("notificationSound");
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play();
+            }
+        }
+
+        async function simplifyMyTasks() {
+            const text = document.getElementById("inputTextMyTasks").value.trim();
+            if (!text) {
+                showToast("⚠️ Введите текст для обработки!", "error");
+                return;
+            }
+
+            try {
+                const res = await fetch("/simplify_api", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ query: text })
+                });
+                const data = await res.json();
+
+                if (Array.isArray(data) && data.length > 0) {
+                    document.getElementById("resultMyTasks").innerText = data[0].description;
+                    showToast("✅ Текст обработан!");
+                } else {
+                    document.getElementById("resultMyTasks").innerText = "❌ Ошибка обработки текста.";
+                    showToast("❌ Ошибка обработки!", "error");
+                }
+            } catch (error) {
+                console.error("Ошибка запроса:", error);
+                document.getElementById("resultMyTasks").innerText = "❌ Ошибка соединения.";
+                showToast("❌ Ошибка соединения!", "error");
+            }
+        }
+
+        function copyResultMyTasks() {
+            const text = document.getElementById("resultMyTasks").innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("✅ Текст скопирован!");
+            }).catch(err => {
+                console.error("Ошибка копирования:", err);
+                showToast("❌ Ошибка копирования!", "error");
+            });
+        }
+    </script>
+</body>
+</html>

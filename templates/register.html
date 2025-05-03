@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Регистрация</title>
+  <style>
+    body {
+      font-family: 'Rubik', sans-serif;
+      background: #0f0f0f;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    form {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #00e0ff;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    input, select, button {
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    button {
+      background: #00e0ff;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #00b5cc;
+    }
+  </style>
+</head>
+<body>
+  <form method="post">
+    <h2>Регистрация</h2>
+    <input type="text" name="username" placeholder="Имя пользователя" required>
+    <input type="password" name="password" placeholder="Пароль" required>
+    <select name="role">
+      <option value="worker">Работчик</option>
+      <option value="admin">Админ (создатель)</option>
+    </select>
+    <button type="submit">Зарегистрироваться</button>
+  </form>
+</body>
+</html>

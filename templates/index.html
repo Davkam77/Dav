@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>🔍 Поиск фриланс-заказов</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+</head>
+<body style="background: url('{{ background }}') no-repeat center center fixed; background-size: cover;">
+
+<!-- Окно чата -->
+<div id="chatWindow">
+    <div class="chat-header">💬 Чат</div>
+    <div id="chatMessages"></div>
+    <div class="chat-input-wrapper">
+        <input type="text" id="chatInput" placeholder="Сообщение..." />
+        <button id="chatSend">➤</button>
+    </div>
+</div>
+
+<!-- Кнопка бургер-меню -->
+<button type="button" class="menu-toggle" onclick="toggleMenu()">☰</button>
+
+<!-- Боковое меню -->
+<nav id="sideMenu" class="side-menu">
+    <ul>
+        <li><a href="/index">🏠 Главная</a></li>
+        <li><a href="/favorites">⭐ Избранные</a></li>
+        <li><a href="/my_tasks">🧰 Мои задания</a></li>
+        <li><a href="/completions">✅ Завершение</a></li>
+        <li><a href="/logout">🚪 Выйти</a></li>
+    </ul>
+</nav>
+
+<!-- Основной контент -->
+<div class="main-content">
+    <header>
+        <h1 class="glow">🔍 Поиск фриланс-заказов</h1>
+    </header>
+
+    <!-- Поисковая форма -->
+    <form class="search-box" onsubmit="sendQuery(event)">
+        <input type="text" id="query" placeholder="Например: AI 100" required>
+        <button type="submit">Найти</button>
+        <button type="button" id="filter-icon" onclick="toggleFilters()">
+            <img src="{{ url_for('static', filename='filter-icon.png') }}" alt="Фильтр">
+        </button>
+    </form>
+
+    <!-- Форма фильтрации -->
+    <div id="filter-panel" aria-hidden="true">
+        <form id="filter-form" onsubmit="applyFilters(event)">
+            <fieldset>
+                <legend>Фильтры поиска</legend>
+                <label for="min-budget">Минимальный бюджет ($):</label>
+                <input type="number" id="min-budget" min="0" placeholder="100" aria-describedby="budget-desc">
+                <p id="budget-desc" class="sr-only">Укажите минимальный бюджет в долларах.</p>
+
+                <label for="region-select">Регион:</label>
+                <select id="region-select" aria-label="Выберите регион">
+                    <option value="">Любой</option>
+                    <option value="India">Индия</option>
+                    <option value="United States">США</option>
+                    <option value="Australia">Австралия</option>
+                </select>
+
+                <label for="payment-type">Тип оплаты:</label>
+                <select id="payment-type">
+                    <option value="">Любой</option>
+                    <option value="Fixed Price">Фиксированная цена</option>
+                    <option value="Hourly">Почасовая</option>
+                </select>
+
+                <label for="experience-select">Опыт:</label>
+                <select id="experience-select">
+                    <option value="">Любой</option>
+                    <option value="Entry">Начальный</option>
+                    <option value="Intermediate">Средний</option>
+                    <option value="Expert">Эксперт</option>
+                </select>
+
+                <label for="max-hours">Макс. часов в неделю:</label>
+                <input type="number" id="max-hours" min="0" placeholder="40">
+
+                <label for="max-deadline">Макс. дедлайн (дней):</label>
+                <input type="number" id="max-deadline" min="0" placeholder="7">
+
+                <button type="submit">Применить</button>
+                <button type="reset" onclick="resetFilters()">Сбросить</button>
+            </fieldset>
+        </form>
+    </div>
+
+    <!-- Форма фильтрации уведомлений -->
+    <button id="notif-filter-toggle" type="button" title="Фильтры уведомлений">
+        <img src="{{ url_for('static', filename='filter-icon2.png') }}" style="width: 50px; height: 50px;" alt="Фильтры уведомлений">
+    </button>
+    <div id="notif-filter-panel" class="">
+        <form id="notif-filter-form" onsubmit="saveUserFilters(event)">
+            <h3>🔔 Уведомления</h3>
+            <label for="filter-keywords">Ключевые слова:</label>
+            <input type="text" id="filter-keywords" placeholder="например: AI, crypto">
+            <label for="filter-min-price">Мин. цена:</label>
+            <input type="number" id="filter-min-price" min="0" placeholder="например: 100">
+            <label for="filter-category">Категория:</label>
+            <select id="filter-category">
+                <option value="">Все</option>
+                <option value="Web Development">Web Development</option>
+                <option value="Design">Design</option>
+                <option value="Marketing">Marketing</option>
+            </select>
+            <label for="filter-telegram">Ваш Telegram ID:</label>
+            <input type="text" id="filter-telegram" placeholder="123456789 (обязательно)" required>
+            <button type="submit">💾 Сохранить</button>
+        </form>
+    </div>
+
+    <!-- Индикатор загрузки -->
+    <div id="loading">
+        <div class="loader-spinner"></div>
+        <div class="loading-dots">⏳ Загрузка...</div>
+    </div>
+
+    <p id="job-stats" style="text-align: center; margin-top: 10px;"></p>
+    <div id="cards" class="cards"></div>
+</div>
+
+<!-- Контейнер для уведомлений -->
+<div id="toast-container"></div>
+
+<!-- Аудио для уведомлений -->
+<audio id="notify-sound" src="{{ url_for('static', filename='legendary-stick-131717.mp3') }}" preload="auto"></audio>
+
+<!-- JavaScript -->
+<script>
+function toggleMenu() {
+    const menu = document.getElementById("sideMenu");
+    const toggle = document.querySelector(".menu-toggle");
+    menu.classList.toggle("open");
+    toggle.style.transform = menu.classList.contains("open") ? "rotate(90deg)" : "rotate(0deg)";
+}
+
+function toggleFilters() {
+    const panel = document.getElementById("filter-panel");
+    panel.classList.toggle("open");
+}
+
+function applyFilters(event) {
+    event.preventDefault();
+    const minBudget = parseFloat(document.getElementById("min-budget").value || 0);
+    const region = document.getElementById("region-select").value;
+    const payment = document.getElementById("payment-type").value;
+    const experience = document.getElementById("experience-select").value;
+    const maxHours = parseInt(document.getElementById("max-hours").value || 168);
+    const maxDeadline = parseInt(document.getElementById("max-deadline").value || 365);
+
+    document.querySelectorAll(".card").forEach(card => {
+        const jobBudget = card.dataset.budget || "";
+        const jobRegion = card.dataset.region || "";
+        const jobPayment = card.dataset.payment || "";
+        const jobExperience = card.dataset.experience || "";
+        const jobHours = parseInt(card.dataset.hours_per_week || 168);
+        const jobDeadline = parseInt(card.dataset.deadline || 365);
+
+        // Проверка без trim
+        const safeJobBudget = jobBudget && typeof jobBudget === 'string' ? jobBudget : "";
+        const safeJobRegion = jobRegion && typeof jobRegion === 'string' ? jobRegion : "";
+        const safeJobPayment = jobPayment && typeof jobPayment === 'string' ? jobPayment : "";
+        const safeJobExperience = jobExperience && typeof jobExperience === 'string' ? jobExperience : "";
+
+        // Логирование для отладки
+        console.log("Фильтры:", { minBudget, region, payment, experience, maxHours, maxDeadline });
+        console.log("Данные карточки:", { safeJobBudget, safeJobRegion, safeJobPayment, safeJobExperience, jobHours, jobDeadline });
+
+        const visible = 
+            (parseFloat(safeJobBudget) >= minBudget || safeJobBudget === "") &&
+            (!region || safeJobRegion.includes(region)) &&
+            (!payment || safeJobPayment.includes(payment)) &&
+            (!experience || safeJobExperience.includes(experience)) &&
+            jobHours <= maxHours &&
+            jobDeadline <= maxDeadline;
+
+        card.style.display = visible ? "block" : "none";
+    });
+}
+
+function resetFilters() {
+    document.getElementById("filter-form").reset();
+    applyFilters(new Event("submit"));
+}
+
+function showToast(message, type = "success") {
+    const container = document.getElementById("toast-container");
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    toast.innerText = message;
+    container.appendChild(toast);
+    setTimeout(() => toast.classList.add("fade-out"), 3000);
+    setTimeout(() => container.removeChild(toast), 4000);
+    const sound = document.getElementById("notify-sound");
+    if (sound) {
+        sound.currentTime = 0;
+        sound.play();
+    }
+}
+
+async function sendQuery(event) {
+    event.preventDefault();
+    const query = document.getElementById("query").value;
+    const button = document.querySelector('button[type="submit"]');
+    console.log("📤 Отправка запроса с темой:", query);
+
+    button.disabled = true;
+    button.innerText = "Поиск...";
+    document.getElementById("loading").style.display = "block";
+    document.getElementById("cards").innerHTML = "";
+    document.getElementById("job-stats").innerText = "";
+
+    try {
+        const response = await fetch("/search", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query })
+        });
+        const jobs = await response.json();
+        localStorage.setItem("saved_jobs", JSON.stringify(jobs));
+
+        if (!Array.isArray(jobs) || jobs.length === 0) {
+            document.getElementById("cards").innerHTML = "<p class='no-results'>Ничего не найдено</p>";
+        } else {
+            jobs.forEach(job => {
+                if (!job.status) job.status = "new";
+                addCard(job);
+            });
+            const takenCount = jobs.filter(job => job.assigned_to).length;
+            const totalCount = jobs.length;
+            document.getElementById("job-stats").innerText = `🟦 Получено: ${totalCount} | 🟧 Занято: ${takenCount}`;
+        }
+        showToast("✅ Поиск завершён");
+    } catch (error) {
+        showToast("❌ Ошибка запроса: " + error.message, "error");
+    } finally {
+        document.getElementById("loading").style.display = "none";
+        button.disabled = false;
+        button.innerText = "Найти";
+    }
+}
+
+
+function addCard(job) {
+    const card = document.createElement("div");
+    card.className = "card fade-in";
+    card.dataset.budget = job.budget || 0;
+    card.dataset.region = job.region || "";
+    card.dataset.payment = job.payment || "";
+    card.dataset.deadline = job.deadline || 365;
+    card.dataset.experience = job.experience || "";
+    card.dataset.hours_per_week = job.hours_per_week || 168;
+    card.dataset.link = job.link || "";
+
+    // Проверка и очистка значений без trim
+    const safeJobTitle = job.title ? job.title : "Без названия";
+    const safeJobDescription = job.description ? job.description : "Нет описания";
+    const safeJobBudget = job.budget ? job.budget : "—";
+
+    // Логирование значений для отладки
+    console.log("Safe job title:", safeJobTitle);
+    console.log("Safe job description:", safeJobDescription);
+    console.log("Safe job budget:", safeJobBudget);
+
+    const buttons = `
+        <div class="task-actions">
+        <button onclick="addToFavorites('${job.link}')">⭐ В избранное</button>
+            <button onclick="takeJob('${job.link}')">🤝 Взять в работу</button>
+        </div>
+    `;
+
+    card.innerHTML = `
+        <h3>${safeJobTitle}</h3>
+        <p><b>Бюджет:</b> ${safeJobBudget}</p>
+        <p class="job-desc">
+            <span class="short">${safeJobDescription.slice(0, 200)}</span>
+            <span class="full" style="display:none;">${safeJobDescription}</span>
+            <a href="#" onclick="toggleDesc(this); return false;">Читать далее</a>
+        </p>
+        ${buttons}
+        <a href="${job.link}" target="_blank" class="card-link">Открыть</a>
+    `;
+
+    document.getElementById("cards").appendChild(card);
+}
+
+function toggleDesc(link) {
+    const shortSpan = link.parentElement.querySelector(".short");
+    const fullSpan = link.parentElement.querySelector(".full");
+
+    if (shortSpan.style.display === "none") {
+        shortSpan.style.display = "inline";
+        fullSpan.style.display = "none";
+        link.innerText = "Читать далее";
+    } else {
+        shortSpan.style.display = "none";
+        fullSpan.style.display = "inline";
+        link.innerText = "Скрыть";
+    }
+}
+
+function addToFavorites(jobId) {
+    fetch('/add_to_favorites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ job_id: jobId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        showToast(data.message || data.error, data.error ? "error" : "success");
+    })
+    .catch(error => {
+        showToast("❌ Ошибка при добавлении в избранное: " + error.message, "error");
+    });
+}
+
+function takeJob(link) {
+    fetch("/assign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ link })
+    })
+    .then(response => response.json())
+    .then(data => {
+        const card = document.querySelector(`[data-link="${link}"]`);
+        if (!card) return;
+        const actions = card.querySelector(".task-actions");
+        if (!actions) return;
+
+        if (data.status === "assigned") {
+            actions.innerHTML = `<span class="task-action locked">🔒 Занято</span>`;
+            showToast("✅ Задание взято в работу");
+        } else if (data.status === "already assigned") {
+            actions.innerHTML = `<span class="task-action locked">🔒 Уже занято</span>`;
+            showToast("⚠️ Задание уже занято", "error");
+        } else {
+            showToast("❌ Не удалось взять задание", "error");
+        }
+    })
+    .catch(err => showToast("❌ Ошибка запроса: " + err.message, "error"));
+}
+
+document.getElementById('notif-filter-toggle').addEventListener('click', () => {
+    const panel = document.getElementById('notif-filter-panel');
+    panel.classList.toggle('active');
+});
+
+function saveUserFilters(event) {
+    event.preventDefault();
+
+    // Получаем значения из формы
+    const keywordsInput = document.getElementById('filter-keywords').value;
+    const minPrice = parseInt(document.getElementById('filter-min-price').value) || 0;
+    const category = document.getElementById('filter-category').value;
+    const telegramId = document.getElementById('filter-telegram').value;
+
+    // Логирование значений перед обработкой
+    console.log("Ключевые слова:", keywordsInput);
+    console.log("Минимальная цена:", minPrice);
+    console.log("Категория:", category);
+    console.log("Telegram ID:", telegramId);
+
+    // Проверка, что значение ключевых слов является строкой
+    const keywords = typeof keywordsInput === 'string' && keywordsInput
+        ? keywordsInput.split(',')
+        : [];
+
+    // Формируем фильтры
+    const filters = {
+        keywords,
+        min_price: minPrice,
+        category,
+        telegram_id: telegramId
+    };
+
+    // Логирование фильтров перед сохранением
+    console.log("Фильтры:", filters);
+
+    // Сохраняем фильтры в localStorage
+    localStorage.setItem('userFilters', JSON.stringify(filters));
+
+    // Отправляем данные на сервер
+    fetch('/save_filter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(filters)
+    })
+    .then(response => {
+        if (response.redirected && response.url.includes('/auth/login')) {
+            showToast('❗ Войдите в аккаунт, чтобы сохранить фильтр.', 'error');
+        } else {
+            return response.json();
+        }
+    })
+    .then(data => {
+        console.log("Ответ от сервера:", data);
+        if (data?.status === 'saved') {
+            showToast('🔔 Фильтры сохранены на сервере!');
+        } else {
+            showToast('❌ Ошибка при сохранении фильтра', 'error');
+        }
+    })
+    .catch(err => {
+        console.error("Ошибка при отправке фильтра:", err);
+        showToast('❌ Ошибка при сохранении фильтра: ' + err.message, 'error');
+    });
+}
+
+const telegramFromServer = "{{ telegram_id }}";
+if (telegramFromServer && telegramFromServer !== "None") {
+    const tgInput = document.getElementById("filter-telegram");
+    if (tgInput) tgInput.value = telegramFromServer;
+}
+
+
+window.onload = function() {
+    const savedJobs = localStorage.getItem("saved_jobs");
+    if (savedJobs) {
+        const jobs = JSON.parse(savedJobs);
+        jobs.forEach(job => {
+            if (!job.status) job.status = "new";
+            addCard(job);
+        });
+        const takenCount = jobs.filter(job => job.assigned_to).length;
+        const totalCount = jobs.length;
+        document.getElementById("job-stats").innerText = `🟦 Получено: ${totalCount} | 🟧 Занято: ${takenCount}`;
+    }
+};
+</script>
+<script src="{{ url_for('static', filename='shorten_description_guru.js') }}"></script>
+</body>
+</html>

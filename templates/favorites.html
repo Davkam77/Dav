@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>⭐ Избранные задания</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body style="background: url('{{ background }}') no-repeat center center fixed; background-size: cover; color: white;">
+
+<button class="menu-toggle" onclick="toggleMenu()">☰</button>
+
+<nav id="sideMenu" class="side-menu">
+    <ul>
+        <li><a href="/index">🏠 Главная</a></li>
+        <li><a href="/favorites">⭐ Избранные</a></li>
+        <li><a href="/my_tasks">🧰 Мои задания</a></li>
+        <li><a href="/completions">✅ Завершение</a></li>
+        <li><a href="/logout">🚪 Выйти</a></li>
+    </ul>
+</nav>
+
+<div class="main-content">
+    <h1 class="glow" style="text-align:center;">⭐ Избранные задания</h1>
+
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="🔍 Поиск в избранном...">
+    </div>
+
+    {% if tasks %}
+    <div class="cards" id="cardsContainer">
+        {% for job in tasks|sort(attribute='budget') %}
+            
+        <div class="card fade-in" data-link="{{ job.link }}">
+            <h3 class="card-title">{{ job.title or 'Без названия' }}</h3>
+            <p><b>💰 Бюджет:</b> {{ job.budget or '—' }}</p>
+            <p><b>⏱️ Длительность:</b> {{ job.duration or '—' }}</p>
+            <p><b>📘 Опыт:</b> {{ job.experience or '—' }}</p>
+            <p><b>⌛ Часов в неделю:</b> {{ job.hours_per_week or '—' }}</p>
+            <p><b>🌍 Регион:</b> {{ job.region or '—' }}</p>
+            <p><b>💳 Оплата:</b> {{ job.payment or '—' }}</p>
+        
+            <p class="job-desc">
+                <span class="short">{{ job.description[:200] }}...</span>
+                <span class="full" style="display:none;">{{ job.description }}</span>
+                <a href="#" onclick="toggleDesc(this); return false;">Читать далее</a>
+            </p>
+            <a href="{{ job.link }}" target="_blank">Открыть задание</a>
+        </div>
+        
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="text-align:center;">⭐ Пока нет избранных заданий</p>
+    {% endif %}
+</div>
+
+<script>
+function toggleMenu() {
+    const menu = document.getElementById("sideMenu");
+    if (menu) menu.classList.toggle("open");
+}
+
+function toggleDesc(link) {
+    const shortSpan = link.parentElement.querySelector(".short");
+    const fullSpan = link.parentElement.querySelector(".full");
+
+    if (shortSpan.style.display === "none") {
+        shortSpan.style.display = "inline";
+        fullSpan.style.display = "none";
+        link.innerText = "Читать далее";
+    } else {
+        shortSpan.style.display = "none";
+        fullSpan.style.display = "inline";
+        link.innerText = "Скрыть";
+    }
+}
+
+const searchInput = document.getElementById('searchInput');
+const cardsContainer = document.getElementById('cardsContainer');
+
+if (searchInput) {
+    searchInput.addEventListener('input', function () {
+        const filter = searchInput.value.toLowerCase();
+        const cards = cardsContainer.querySelectorAll('.card');
+
+        cards.forEach(card => {
+            const title = card.querySelector('.card-title')?.textContent.toLowerCase() || '';
+            const desc = card.querySelector('.card-desc')?.textContent.toLowerCase() || '';
+
+            if (title.includes(filter) || desc.includes(filter)) {
+                card.classList.remove('fade-out');
+                card.classList.add('fade-in');
+                card.style.display = 'block';
+            } else {
+                card.classList.remove('fade-in');
+                card.classList.add('fade-out');
+                setTimeout(() => {
+                    card.style.display = 'none';
+                }, 400);
+            }
+        });
+    });
+}
+</script>
+
+</body>
+</html>
