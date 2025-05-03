@@ -6,69 +6,174 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Rubik&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
-</head>
-<body>
-    <!-- Кнопка бургер-меню -->
-    <button class="menu-toggle">☰</button>
-
-    <!-- Боковое меню -->
-    <nav id="sideMenu" class="side-menu">
-        <button class="menu-close">✖</button>
-        <ul>
-            <li><a href="/index">🏠 Главная</a></li>
-            <li><a href="/favorites">⭐ Избранные</a></li>
-            <li><a href="/my_tasks">🧰 Мои задания</a></li>
-            <li><a href="/completions">✅ Завершение</a></li>
-            <li><a href="/logout">🚪 Выйти</a></li>
-        </ul>
-    </nav>
-
-    <div class="container">
-        <h2>🏁 Завершённые задания</h2>
-
-        {% if tasks %}
-            {% for task in tasks %}
-                <div class="card" data-task-id="{{ task.id }}">
-                    <h3>{{ task.title or "Без названия" }}</h3>
-                    <p>{{ task.description[:200] }}...</p>
-                    <p class="status-completed">Статус: Завершено</p>
-                    <small>📅 Задание ID: {{ task.id }}</small>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p class="no-tasks">Пока нет завершённых заданий.</p>
-        {% endif %}
-    </div>
-
-    <script>
-        const socket = io();
-
-        socket.on('task_completed', (task) => {
-            const container = document.querySelector('.container');
-            const noTasks = document.querySelector('.no-tasks');
-            if (noTasks) {
-                noTasks.remove();
-            }
-
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.setAttribute('data-task-id', task.id);
-            card.innerHTML = `
-                <h3>${task.title || 'Без названия'}</h3>
-                <p>${(task.description || '').slice(0, 200)}...</p>
-                <p class="status-completed">Статус: Завершено</p>
-                <small>📅 Задание ID: ${task.id}</small>
-            `;
-            container.appendChild(card);
-        });
-
-        function toggleMenu() {
-            const menu = document.getElementById('sideMenu');
-            const toggle = document.querySelector('.menu-toggle');
-            menu.classList.toggle('open');
-            toggle.style.transform = menu.classList.contains('open') ? 'rotate(90deg)' : 'rotate(0deg)';
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Rubik', sans-serif;
+            background: url('{{ background }}') no-repeat center center fixed;
+            background-size: cover;
+            background-attachment: fixed;
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-y: auto;
+            padding-top: 80px; /* ✅ Отступ чтобы карточки не обрезались */
         }
-    </script>
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(0,0,0,0.7);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+        }
+
+        .card {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            animation: fadeIn 1s ease forwards;
+        }
+
+        h2 {
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 40px;
+            margin-bottom: 30px;
+            text-shadow: 0 0 8px #00e0ff, 0 0 16px #0077aa;
+        }
+
+        h3 {
+            font-size: 24px;
+            color: #00e0ff;
+        }
+
+        p {
+            font-size: 18px;
+            color: #ddd;
+        }
+
+        small {
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .menu-toggle {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 26px;
+    color: white;
+    cursor: pointer;
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s, transform 0.3s;
+}
+
+.menu-toggle:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* Боковое меню */
+.side-menu {
+    position: fixed;
+    top: 20px;
+    left: -270px; /* скрыто слева */
+    width: 250px;
+    height: calc(100% - 40px); /* минус отступы */
+    background: rgba(0, 0, 0, 0.85); /* плотный прозрачный чёрный фон */
+    padding: 30px 20px;
+    border-radius: 15px;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.5);
+    transition: left 0.4s ease;
+    z-index: 1000;
+}
+
+/* Когда меню открыто */
+.side-menu.open {
+    left: 20px;
+}
+
+/* Элементы меню */
+.side-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.side-menu ul li {
+    margin: 25px 0;
+}
+
+.side-menu ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    transition: color 0.3s;
+}
+
+.side-menu ul li a:hover {
+    color: #00e0ff;
+}
+    </style>
+</head>
+
+<button class="menu-toggle" onclick="toggleMenu()">☰</button>
+<nav id="sideMenu" class="side-menu">
+    <ul>
+        <li><a href="/index">🏠 Главная</a></li>
+        <li><a href="/favorites">⭐ Избранные</a></li>
+        <li><a href="/my_tasks">🧰 Мои задания</a></li>
+        <li><a href="/completions">✅ Завершение</a></li>
+        <li><a href="/logout">🚪 Выйти</a></li>
+    </ul>
+</nav>
+
+
+<body>
+
+
+<div class="container">
+    <h2>🏁 Завершённые задания</h2>
+
+    {% if tasks %}
+        {% for task in tasks %}
+            <div class="card">
+                <h3>{{ task.title or "Без названия" }}</h3>
+                <p>{{ task.description[:200] }}...</p>
+                <p style="color: gold;">Статус: Завершено</p>
+                <small>📅 Задание ID: {{ task.id }}</small>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p style="text-align:center; color: #ccc;">Пока нет завершённых заданий.</p>
+    {% endif %}
+</div>
+<script>
+   function toggleMenu() {
+    const menu = document.getElementById("sideMenu");
+    const toggle = document.querySelector(".menu-toggle");
+
+    if (menu.classList.contains("open")) {
+        menu.classList.remove("open");
+        toggle.style.transform = "rotate(0deg)";
+    } else {
+        menu.classList.add("open");
+        toggle.style.transform = "rotate(90deg)";
+    }
+}
+</script>
 </body>
 </html>

@@ -13,6 +13,7 @@ from flask_login import LoginManager
 from flask_login import login_required, current_user
 from users.models import UserFilter, db
 
+
 # 📍 Определяем путь до проекта
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -293,7 +294,8 @@ def complete_job(job_id):
     job = Job.query.get_or_404(job_id)
     
     if job.assigned_to != current_user.id:
-        return jsonify({"status": "error", "message": "Вы не назначены на это задание"}), 403
+        # Для HTML-формы возвращаем редирект с уведомлением об ошибке
+        return render_template("my_tasks.html", tasks=Job.query.filter(Job.assigned_to == current_user.id, Job.status == "in_progress").all(), background=get_unsplash_background(), error="Вы не назначены на это задание")
     
     if job.status == "in_progress":
         job.status = "done"
@@ -303,18 +305,13 @@ def complete_job(job_id):
             "title": job.title,
             "description": job.description
         })
-        socketio.emit("chat message", {
+        socketio.emit("chat_message", {  # Исправлено "chat message" на "chat_message" и убрано namespace
             "msg": f"✅ {current_user.username} завершил задание: {job.title}",
             "time": datetime.now().strftime("%H:%M")
-        }, namespace="/")
-        return jsonify({"status": "completed", "task": {
-            "id": job.id,
-            "title": job.title,
-            "description": job.description
-        }})
+        })
+        return redirect(url_for("my_tasks"))
     
-    return jsonify({"status": "error", "message": "Задание не в процессе выполнения"}), 400
-
+    return render_template("my_tasks.html", tasks=Job.query.filter(Job.assigned_to == current_user.id, Job.status == "in_progress").all(), background=get_unsplash_background(), error="Задание не в процессе выполнения")
 @app.route("/assign", methods=["POST"])
 @login_required
 def assign_job():
