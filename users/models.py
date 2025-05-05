@@ -65,13 +65,15 @@ class Job(db.Model):
     link = db.Column(db.String(255), unique=True, nullable=False)
     status = db.Column(db.String(50), nullable=False, default="new")
     assigned_to = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Добавляем поле для владельца задачи
 
     category = db.Column(db.String(50), nullable=True)
     deadline = db.Column(db.String(50), nullable=True)
     project_type = db.Column(db.String(50), nullable=True)
     complexity = db.Column(db.Enum(Complexity), nullable=True)
 
-    assignee = db.relationship('User', backref='jobs', lazy='select')
+    assignee = db.relationship('User', backref='assigned_jobs', lazy='select', foreign_keys=[assigned_to])
+    user = db.relationship('User', backref='owned_jobs', lazy='select', foreign_keys=[user_id])  # Связь для владельца задачи
 
 # 📤 Отправленные задачи (например, в телеграм)
 class SentJob(db.Model):

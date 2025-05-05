@@ -6,8 +6,41 @@
     <meta name="description" content="Вход в систему">
     <title>Вход в систему</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .admin-checkbox {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .admin-checkbox input {
+            margin-right: 5px;
+            accent-color: #00b7eb; /* Цвет чекбокса */
+            transform: scale(1.5); /* Увеличим размер для видимости */
+        }
+        .admin-checkbox label {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 5px 10px;
+            background-color: #4a4a4a;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+        .admin-checkbox label:hover {
+            background-color: #6a6a6a;
+        }
+    </style>
 </head>
 <body>
+    <!-- Чекбокс для входа как администратор -->
+    <div class="admin-checkbox">
+        <input type="checkbox" id="admin_login" name="admin_login">
+        <label for="admin_login">Администратор</label>
+    </div>
+
     <!-- Уведомления -->
     <div id="toast-container">
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -34,54 +67,5 @@
             </p>
         </form>
     </div>
-
-   
-
-    <!-- Скрипты -->
-    <script>
-        const joystick = document.getElementById('joystick');
-        const joystickContainer = document.getElementById('joystick-container');
-        let isDragging = false;
-
-        joystick.addEventListener('mousedown', startDragging);
-        joystick.addEventListener('touchstart', startDragging);
-        document.addEventListener('mousemove', moveJoystick);
-        document.addEventListener('touchmove', moveJoystick);
-        document.addEventListener('mouseup', stopDragging);
-        document.addEventListener('touchend', stopDragging);
-
-        function startDragging(e) {
-            isDragging = true;
-            e.preventDefault();
-        }
-
-        function moveJoystick(e) {
-            if (!isDragging) return;
-
-            const rect = joystickContainer.getBoundingClientRect();
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
-            let x, y;
-
-            if (e.type === 'touchmove') {
-                x = e.touches[0].clientX - rect.left;
-                y = e.touches[0].clientY - rect.top;
-            } else {
-                x = e.clientX - rect.left;
-                y = e.clientY - rect.top;
-            }
-
-            const maxDistance = rect.width / 2 - joystick.offsetWidth / 2;
-            const dx = Math.max(-maxDistance, Math.min(maxDistance, x - centerX));
-            const dy = Math.max(-maxDistance, Math.min(maxDistance, y - centerY));
-
-            joystick.style.transform = `translate(${dx}px, ${dy}px)`;
-        }
-
-        function stopDragging() {
-            isDragging = false;
-            joystick.style.transform = 'translate(0, 0)';
-        }
-    </script>
 </body>
 </html>

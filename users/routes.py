@@ -20,6 +20,10 @@ def register():
             flash("Введите имя и пароль", "error")
             return redirect(url_for("users.register"))
 
+        if username == 'admin':  # Запрещаем регистрацию с username='admin'
+            flash("❌ Имя 'admin' зарезервировано", "error")
+            return redirect(url_for("users.register"))
+
         if User.query.filter_by(username=username).first():
             flash("❌ Пользователь уже существует", "error")
             return redirect(url_for("users.register"))
@@ -41,17 +45,33 @@ def login():
     if request.method == 'POST':
         username = request.form.get("username")
         password = request.form.get("password")
+        admin_login = request.form.get("admin_login")  # Проверяем, включён ли чекбокс
 
         user = User.query.filter_by(username=username).first()
-        if user and user.check_password(password):
+
+        # Если включён чекбокс "Администратор"
+        if admin_login:
+            # Вход возможен только с username='admin'
+            if username != 'admin':
+                flash("❌ Для входа как администратор используйте username 'admin'", "error")
+                return render_template('login.html')
+            if not user or not user.check_password(password) or user.role != 'admin':
+                flash("❌ Неверный логин или пароль администратора", "error")
+                return render_template('login.html')
             login_user(user)
-            flash("✅ Успешный вход", "success")
-            next_page = request.args.get("next")
-            return redirect(next_page or url_for("index"))
+            flash("✅ Успешный вход как администратор", "success")
+            return redirect(url_for('admin_dashboard'))
 
-        flash("❌ Неверный логин или пароль", "error")
+        # Обычный вход для пользователей
+        if not user or not user.check_password(password):
+            flash("❌ Неверный логин или пароль", "error")
+            return render_template('login.html')
 
-    return render_template("login.html")
+        login_user(user)
+        flash("✅ Успешный вход", "success")
+        return redirect(url_for('index'))
+
+    return render_template('login.html')
 
 # 🚪 Выход
 @users_bp.route('/logout')

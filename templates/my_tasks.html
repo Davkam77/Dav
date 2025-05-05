@@ -29,26 +29,35 @@
         <h2 class="glow">👷 Мои задания</h2>
 
         {% for task in tasks %}
-        <div class="task-card fade-in">
-            <h3>{{ task.title }}</h3>
-            <p>{{ task.description[:200] }}...</p>
-            <p class="task-status">
-                <b>Статус:</b>
-                {% if task.status == 'in_progress' %}
-                    <span class="status-in-progress">В работе</span>
-                    <a href="/task/complete/{{ task.id }}" class="task-action complete">🏁 Завершить</a>
-                {% elif task.status == 'done' %}
-                    <span class="status-done">Завершено</span>
-                {% else %}
-                    <span class="status-unknown">Неизвестно</span>
-                {% endif %}
-            </p>
-            <p class="task-id">📅 Задание ID: {{ task.id }}</p>
-            {% if task.link %}
-                <a href="{{ task.link }}" target="_blank" class="task-link">🔗 Перейти к заказу</a>
-            {% endif %}
-        </div>
-        {% endfor %}
+<div class="task-card fade-in"> 
+    <h3>{{ task.title }}</h3>
+    <p>{{ task.description[:200] }}...</p>
+
+    {% if task.link %}
+        <a href="{{ task.link }}" target="_blank" class="task-link">🔗 Перейти к заказу</a>
+    {% endif %}
+
+    <p class="task-status">
+        <b>Статус:</b>
+        {% if task.status == 'in_progress' %}
+            <span class="status-in-progress">В работе</span>
+        {% elif task.status == 'done' %}
+            <span class="status-done">Завершено</span>
+        {% else %}
+            <span class="status-unknown">Неизвестно</span>
+        {% endif %}
+    </p>
+
+    {% if task.status == 'in_progress' %}
+    <form action="/task/complete/{{ task.id }}" method="POST" style="display:inline;">
+        <button type="submit" class="task-action complete">🏁 Завершить</button>
+    </form>
+    {% endif %}
+
+    <p class="task-id">📅 Задание ID: {{ task.id }}</p>
+</div>
+{% endfor %}
+
 
         <!-- AI Обработка -->
         <div id="aiBlock" class="fade-in">

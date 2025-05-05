@@ -29,29 +29,35 @@
 
     {% if tasks %}
     <div class="cards" id="cardsContainer">
-        {% for job in tasks|sort(attribute='budget') %}
-            
-        <div class="card fade-in" data-link="{{ job.link }}">
-            <h3 class="card-title">{{ job.title or 'Без названия' }}</h3>
-            <p><b>💰 Бюджет:</b> {{ job.budget or '—' }}</p>
-            <p><b>⏱️ Длительность:</b> {{ job.duration or '—' }}</p>
-            <p><b>📘 Опыт:</b> {{ job.experience or '—' }}</p>
-            <p><b>⌛ Часов в неделю:</b> {{ job.hours_per_week or '—' }}</p>
-            <p><b>🌍 Регион:</b> {{ job.region or '—' }}</p>
-            <p><b>💳 Оплата:</b> {{ job.payment or '—' }}</p>
-        
-            <p class="job-desc">
-                <span class="short">{{ job.description[:200] }}...</span>
-                <span class="full" style="display:none;">{{ job.description }}</span>
-                <a href="#" onclick="toggleDesc(this); return false;">Читать далее</a>
-            </p>
-            <a href="{{ job.link }}" target="_blank">Открыть задание</a>
-        </div>
-        
+        {% for job in tasks %}
+        <div class="card fade-in">
+            <h3 class="card-title">{{ job.title or "Без названия" }}</h3>
+          
+            <div class="card-info">
+              {% if job.budget %}<p><b>💰 Бюджет:</b> {{ job.budget }}</p>{% endif %}
+              {% if job.duration %}<p><b>⏱️ Длительность:</b> {{ job.duration }}</p>{% endif %}
+              {% if job.experience %}<p><b>📘 Опыт:</b> {{ job.experience }}</p>{% endif %}
+              {% if job.hours_per_week %}<p><b>⌛ Часов/неделя:</b> {{ job.hours_per_week }}</p>{% endif %}
+              {% if job.region %}<p><b>🌍 Регион:</b> {{ job.region }}</p>{% endif %}
+              {% if job.payment %}<p><b>💳 Оплата:</b> {{ job.payment }}</p>{% endif %}
+            </div>
+          
+            {% if job.description %}
+            <div class="job-desc">
+              <span class="short">{{ job.description[:250] }}...</span>
+              <span class="full" style="display:none;">{{ job.description }}</span>
+              <a href="#" onclick="toggleDesc(this); return false;">Читать далее</a>
+            </div>
+            {% endif %}
+          
+            <a class="open-link" href="{{ job.link }}" target="_blank">🔗 Открыть задание</a>
+          </div>
+          
+
         {% endfor %}
     </div>
     {% else %}
-    <p style="text-align:center;">⭐ Пока нет избранных заданий</p>
+        <p style="text-align:center;">⭐ Пока нет избранных заданий</p>
     {% endif %}
 </div>
 
@@ -86,7 +92,7 @@ if (searchInput) {
 
         cards.forEach(card => {
             const title = card.querySelector('.card-title')?.textContent.toLowerCase() || '';
-            const desc = card.querySelector('.card-desc')?.textContent.toLowerCase() || '';
+            const desc = card.querySelector('.job-desc')?.textContent.toLowerCase() || '';
 
             if (title.includes(filter) || desc.includes(filter)) {
                 card.classList.remove('fade-out');

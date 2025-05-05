@@ -1759,3 +1759,26 @@ body::before {
         cursor: pointer;
         margin-top: 5px;
       }
+      .card {
+        background: rgba(0,0,0,0.6);
+        padding: 20px;
+        margin: 10px;
+        border-radius: 15px;
+        max-width: 400px;
+        overflow: hidden;
+        color: white;
+        transition: all 0.3s ease;
+      }
+      
+      .job-desc .short {
+        display: block;
+        max-height: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      
+      .job-desc .full {
+        display: block;
+        white-space: pre-wrap;
+      }
+      
