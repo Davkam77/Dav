@@ -6,41 +6,9 @@
     <meta name="description" content="Вход в систему">
     <title>Вход в систему</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <style>
-        .admin-checkbox {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            align-items: center;
-        }
-        .admin-checkbox input {
-            margin-right: 5px;
-            accent-color: #00b7eb; /* Цвет чекбокса */
-            transform: scale(1.5); /* Увеличим размер для видимости */
-        }
-        .admin-checkbox label {
-            color: #ffffff;
-            font-size: 16px;
-            font-weight: bold;
-            padding: 5px 10px;
-            background-color: #4a4a4a;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-            cursor: pointer;
-        }
-        .admin-checkbox label:hover {
-            background-color: #6a6a6a;
-        }
-    </style>
+    
 </head>
 <body>
-    <!-- Чекбокс для входа как администратор -->
-    <div class="admin-checkbox">
-        <input type="checkbox" id="admin_login" name="admin_login">
-        <label for="admin_login">Администратор</label>
-    </div>
-
     <!-- Уведомления -->
     <div id="toast-container">
         {% with messages = get_flashed_messages(with_categories=true) %}

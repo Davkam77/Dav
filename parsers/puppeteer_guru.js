@@ -19,61 +19,47 @@ const logger = winston.createLogger({
   ]
 });
 
-const topic = process.argv[2].toLowerCase();
+const topic = (process.argv[2] || '').toLowerCase();
 const minPrice = parseInt(process.argv[3]) || 0;
+const maxPrice = parseInt(process.argv[4]) || Infinity;
+const region = (process.argv[5] || '').toLowerCase();
+const jobs = [];
 
-async function wait(ms, message) {
-  if (message) logger.info(message);
-  return new Promise(resolve => setTimeout(resolve, ms));
+function wait(ms, msg) {
+  if (msg) logger.info(msg);
+  return new Promise(r => setTimeout(r, ms));
 }
 
 function parseBudget(text) {
-  if (!text || typeof text !== 'string') return 0;
-  const underMatch = text.match(/Under\s*\$\s*(\d+)/i);
-  if (underMatch) return parseFloat(underMatch[1]);
-  const dollarMatch = text.match(/\$\s*([\d,.]+)/);
-  if (dollarMatch) return parseFloat(dollarMatch[1].replace(/,/g, ''));
-  return 0;
+  const match = text?.match(/\$[\s]*([\d,.]+)/);
+  return match ? parseFloat(match[1].replace(/,/g, '')) : NaN;
 }
 
 (async () => {
   let browser;
-  const jobs = [];
-
   try {
-    logger.info('🚀 Запуск Puppeteer');
+    logger.info('🚀 Запуск Puppeteer для Guru');
     browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64)...');
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
 
-    // Загрузка cookies
     const cookiesPath = path.resolve(__dirname, 'guru_cookies.json');
-    try {
-      const cookies = JSON.parse(await fs.readFile(cookiesPath));
+    if (await fs.access(cookiesPath).then(() => true).catch(() => false)) {
+      const cookies = JSON.parse(await fs.readFile(cookiesPath, 'utf-8'));
       await page.setCookie(...cookies);
-      logger.info("✅ Cookies загружены");
-    } catch {
-      logger.warn("⚠️ Cookies не найдены");
+      logger.info('✅ Cookies загружены');
+    } else {
+      logger.warn('⚠️ Cookies не найдены, требуется авторизация');
+      await page.goto('https://www.guru.com/login.aspx', { waitUntil: 'networkidle2' });
+      await wait(60000, '⏳ Ожидание ручной авторизации');
+      const cookies = await page.cookies();
+      await fs.writeFile(cookiesPath, JSON.stringify(cookies, null, 2));
+      logger.info('✅ Cookies сохранены в guru_cookies.json');
     }
 
-    await page.goto('https://www.guru.com/work/', { waitUntil: 'networkidle2', timeout: 60000 });
-    logger.info('🟢 Открыт сайт guru.com');
-
-    const input = await page.$('input[aria-label="Search freelance jobs"]');
-    if (input) {
-      await input.click({ clickCount: 3 });
-      await input.type(topic, { delay: 50 });
-    }
-
-    const button = await page.$('[id="13_searchBtnTop"]');
-    if (button) {
-      await Promise.all([
-        page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 80000 }).catch(() => logger.warn('⚠️ Навигация не сработала')),
-        button.click()
-      ]);
-    }
-
-    await wait(3000, '📥 Ждём результаты');
+    const url = `https://www.guru.com/d/jobs/q/${encodeURIComponent(topic)}/`;
+    logger.info(`🌐 Переход на: ${url}`);
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
     let lastHeight = await page.evaluate('document.body.scrollHeight');
     for (let i = 0; i < 5; i++) {
@@ -84,40 +70,31 @@ function parseBudget(text) {
       lastHeight = newHeight;
     }
 
-    const jobLinks = await page.$$eval('a[href^="/work/detail/"]', (links, topic) =>
-      [...new Set(
-        links.filter(a => a.innerText.toLowerCase().includes(topic)).map(a => "https://www.guru.com" + a.getAttribute("href"))
-      )], topic);
+    const links = await page.$$eval('a.jobTitle', els => [...new Set(els.map(el => el.href))]);
+    logger.info(`🔗 Найдено ссылок: ${links.length}`);
 
-    logger.info(`🧲 Найдено карточек: ${jobLinks.length}`);
-
-    for (const link of jobLinks) {
+    for (const link of links) {
       try {
         await page.goto(link, { waitUntil: 'domcontentloaded', timeout: 60000 });
         await wait(10000, `📄 Чтение карточки: ${link}`);
 
-        const rawTitle = await page.$eval('h1.jobHeading__title', el => el.innerText).catch(() => 'Без названия');
-        const title = rawTitle.trim();
-
-        const description = await page.$$eval('p', els =>
-          els.map(el => el.innerText).join('\n')
-        ).catch(() => 'Нет описания');
-
-        const budgetText = await page.$$eval('div', els =>
-          els.map(el => el.innerText).find(text => /(\$\d+|\bUnder \$\d+)/.test(text)) || '—'
-        ).catch(() => '—');
+        const title = await page.$eval('h1', el => el.innerText).catch(() => 'Без названия');
+        const description = await page.$$eval('p', els => els.map(el => el.innerText).join('\n')).catch(() => 'Нет описания');
+        const budgetText = await page.$$eval('*', els => els.map(el => el.innerText).find(txt => /\$\s*\d+/.test(txt)) || '—').catch(() => '—');
+        const regionText = await page.$eval('div.jobLocations[title*="Preferred Locations"]', el => el.getAttribute('title').replace('Preferred Locations: ', '')).catch(() => 'Не указан');
 
         const parsedPrice = parseBudget(budgetText);
-        if (parsedPrice >= minPrice) {
-          jobs.push({
-            title: `Guru: ${title}`,
-            budget: parsedPrice ? `$${parsedPrice}` : "неизвестно",
-            description: description.slice(0, 1000),
-            link
-          });
-          logger.info(`✅ Добавлено: ${title} ($${parsedPrice})`);
+
+        if (isNaN(parsedPrice)) {
+          logger.warn(`⚠️ Цена не найдена: ${budgetText}`);
+          if (!region || regionText.toLowerCase().includes(region)) {
+            jobs.push({ title: `Guru: ${title}`, budget: 'неизвестно', description, link, region: regionText });
+          }
+        } else if (parsedPrice >= minPrice && parsedPrice <= maxPrice && (!region || regionText.toLowerCase().includes(region))) {
+          jobs.push({ title: `Guru: ${title}`, budget: `$${parsedPrice}`, description, link, region: regionText });
+          logger.info(`✅ Добавлено: ${title} ($${parsedPrice}, ${regionText})`);
         } else {
-          logger.info(`⛔ Пропущено: $${parsedPrice} < $${minPrice}`);
+          logger.info(`⛔ Пропущено: $${parsedPrice} (min: ${minPrice}, max: ${maxPrice}) или регион ${regionText} не ${region}`);
         }
       } catch (err) {
         logger.warn(`⚠️ Ошибка карточки: ${link} — ${err.message}`);
@@ -127,11 +104,10 @@ function parseBudget(text) {
     const outputPath = path.resolve(__dirname, '../results/guru.json');
     await fs.mkdir(path.dirname(outputPath), { recursive: true });
     await fs.writeFile(outputPath, JSON.stringify(jobs, null, 2), 'utf-8');
-    logger.info('📦 Результаты сохранены');
+    logger.info('📦 Сохранено в guru.json');
     console.log(JSON.stringify(jobs));
-
-  } catch (e) {
-    logger.error(`❌ Ошибка: ${e.message}`);
+  } catch (err) {
+    logger.error(`❌ Ошибка: ${err.message}`);
   } finally {
     if (browser) {
       await wait(10000, '📴 Закрытие браузера');

@@ -21,6 +21,8 @@ const logger = winston.createLogger({
 
 const topic = (process.argv[2] || '').toLowerCase();
 const minPrice = parseInt(process.argv[3]) || 0;
+const maxPrice = parseInt(process.argv[4]) || Infinity;
+const region = (process.argv[5] || '').toLowerCase();
 const jobs = [];
 
 function wait(ms, msg) {
@@ -39,7 +41,7 @@ function parseBudget(text) {
     logger.info('🚀 Запуск Puppeteer для Upwork');
     browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64)...');
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
 
     const url = `https://www.upwork.com/nx/jobs/search/?q=${encodeURIComponent(topic)}`;
     logger.info(`🌐 Переход на: ${url}`);
@@ -54,9 +56,7 @@ function parseBudget(text) {
       lastHeight = newHeight;
     }
 
-    const links = await page.$$eval('a[data-test="job-tile-title-link UpLink"]', els =>
-      [...new Set(els.map(el => el.href))]);
-
+    const links = await page.$$eval('a[data-test="job-tile-title-link UpLink"]', els => [...new Set(els.map(el => el.href))]);
     logger.info(`🔗 Найдено ссылок: ${links.length}`);
 
     for (const link of links) {
@@ -65,27 +65,23 @@ function parseBudget(text) {
         await wait(10000, `📄 Чтение карточки: ${link}`);
 
         const title = await page.$eval('h1', el => el.innerText).catch(() => 'Без названия');
-
-        const description = await page.$$eval('p', els =>
-          els.map(el => el.innerText).join('\n')
-        ).catch(() => 'Нет описания');
-
-        const budgetText = await page.$$eval('*', els =>
-          els.map(el => el.innerText).find(txt => /\$\s*\d+/.test(txt)) || '—'
-        ).catch(() => '—');
+        const description = await page.$$eval('p', els => els.map(el => el.innerText).join('\n')).catch(() => 'Нет описания');
+        const budgetText = await page.$$eval('*', els => els.map(el => el.innerText).find(txt => /\$\s*\d+/.test(txt)) || '—').catch(() => '—');
+        const regionText = await page.$eval('li[data-qa="client-location"] strong', el => el.innerText).catch(() => 'Не указан');
 
         const parsedPrice = parseBudget(budgetText);
 
         if (isNaN(parsedPrice)) {
           logger.warn(`⚠️ Цена не найдена: ${budgetText}`);
-          jobs.push({ title: `Upwork: ${title}`, budget: 'неизвестно', description, link });
-        } else if (parsedPrice >= minPrice) {
-          jobs.push({ title: `Upwork: ${title}`, budget: `$${parsedPrice}`, description, link });
-          logger.info(`✅ Добавлено: ${title} ($${parsedPrice})`);
+          if (!region || regionText.toLowerCase().includes(region)) {
+            jobs.push({ title: `Upwork: ${title}`, budget: 'неизвестно', description, link, region: regionText });
+          }
+        } else if (parsedPrice >= minPrice && parsedPrice <= maxPrice && (!region || regionText.toLowerCase().includes(region))) {
+          jobs.push({ title: `Upwork: ${title}`, budget: `$${parsedPrice}`, description, link, region: regionText });
+          logger.info(`✅ Добавлено: ${title} ($${parsedPrice}, ${regionText})`);
         } else {
-          logger.info(`⛔ Пропущено: $${parsedPrice} < $${minPrice}`);
+          logger.info(`⛔ Пропущено: $${parsedPrice} (min: ${minPrice}, max: ${maxPrice}) или регион ${regionText} не ${region}`);
         }
-
       } catch (err) {
         logger.warn(`⚠️ Ошибка карточки: ${link} — ${err.message}`);
       }
@@ -96,7 +92,6 @@ function parseBudget(text) {
     await fs.writeFile(outputPath, JSON.stringify(jobs, null, 2), 'utf-8');
     logger.info('📦 Сохранено в upwork.json');
     console.log(JSON.stringify(jobs));
-
   } catch (err) {
     logger.error(`❌ Ошибка: ${err.message}`);
   } finally {

@@ -1,6 +1,3 @@
-<!-- Очищенная версия index.html и стилей: только для корректной работы страниц -->
-<!-- Будут сохранены: index.html, login.html, register.html, favorites.html, completions.html -->
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -8,6 +5,49 @@
   <title>🔍 Поиск фриланс-заказов</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    .sort-box {
+      margin: 20px 0;
+      text-align: center;
+    }
+    .sort-box label {
+      margin-right: 10px;
+      font-size: 16px;
+    }
+    .sort-box select {
+      padding: 5px;
+      font-size: 16px;
+    }
+    .error-message {
+      color: red;
+      text-align: center;
+      margin: 20px 0;
+    }
+    .search-box {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    .search-box input {
+      padding: 8px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .search-box button {
+      padding: 8px 16px;
+      background: #0dcaf0;
+      border: none;
+      border-radius: 5px;
+      color: #fff;
+      cursor: pointer;
+    }
+    .search-box button:hover {
+      background: #0a9ebb;
+    }
+  </style>
 </head>
 <body style="background: url('{{ background }}') no-repeat center center fixed; background-size: cover;">
 
@@ -35,6 +75,13 @@
   </form>
 
   <p id="job-stats"></p>
+  <div class="sort-box">
+    <label for="sort">Сортировать по:</label>
+    <select id="sort" onchange="sortJobs()">
+      <option value="asc">Цене (по возрастанию)</option>
+      <option value="desc">Цене (по убыванию)</option>
+    </select>
+  </div>
   <div id="cards"></div>
 </div>
 
@@ -44,29 +91,62 @@ function toggleMenu() {
   menu.classList.toggle("open");
 }
 
+// Глобальная переменная для хранения текущих результатов поиска
+let currentJobs = [];
 
 async function sendQuery(event) {
   event.preventDefault();
   const query = document.getElementById("query").value;
-  const response = await fetch("/search", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query })
-  });
-  const jobs = await response.json();
+  const min_price = document.getElementById("min_price").value;
+  const max_price = document.getElementById("max_price").value;
+  const region = document.getElementById("region").value;
   const cards = document.getElementById("cards");
-  cards.innerHTML = jobs.map(job => `
+  cards.innerHTML = '<p>Загрузка...</p>'; // Показываем индикатор загрузки
+  try {
+    const response = await fetch("/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query, min_price, max_price, region })
+    });
+    if (!response.ok) {
+      throw new Error(`Ошибка сервера: ${response.status}`);
+    }
+    const jobs = await response.json();
+    console.log("Ответ от /search:", jobs); // Отладка
+    if (jobs.error) {
+      cards.innerHTML = `<p class="error-message">${jobs.error}</p>`;
+      return;
+    }
+    currentJobs = jobs;
+    sortJobs();
+  } catch (err) {
+    cards.innerHTML = `<p class="error-message">Ошибка при загрузке заказов: ${err.message}</p>`;
+    console.error("Ошибка поиска:", err);
+  }
+}
+
+function sortJobs() {
+  const sortOrder = document.getElementById("sort").value;
+  const sortedJobs = [...currentJobs].sort((a, b) => {
+    // Обрабатываем нечисловые бюджеты
+    const priceA = a.budget && a.budget !== "Не указан" ? parseFloat(a.budget.replace(/[^0-9.]/g, '')) || 0 : 0;
+    const priceB = b.budget && b.budget !== "Не указан" ? parseFloat(b.budget.replace(/[^0-9.]/g, '')) || 0 : 0;
+    return sortOrder === "asc" ? priceA - priceB : priceB - priceA;
+  });
+
+  const cards = document.getElementById("cards");
+  cards.innerHTML = sortedJobs.length > 0 ? sortedJobs.map(job => `
     <div class="card">
-      <h3>${job.title}</h3>
-      <p><b>Бюджет:</b> ${job.budget}</p>
-      <p>${job.description.slice(0, 150)}...</p>
+      <h3>${job.title || "Без названия"}</h3>
+      <p><b>Бюджет:</b> ${job.budget || "Не указан"}</p>
+      <p>${job.description ? job.description.slice(0, 150) + "..." : "Описание отсутствует"}</p>
       <a href="${job.link}" target="_blank">Открыть</a>
       <div class="card-buttons">
         <button class="card-button favorite" onclick="addToFavorites('${job.link}')">⭐ В избранное</button>
         <a class="card-button take" href="/task/take/${job.id}">🤝 Взять в работу</a>
       </div>
     </div>
-  `).join('');
+  `).join('') : '<p class="error-message">Заказы не найдены.</p>';
 }
 
 async function addToFavorites(jobLink) {
@@ -84,7 +164,6 @@ async function addToFavorites(jobLink) {
   }
 }
 </script>
-
 
 </body>
 </html>

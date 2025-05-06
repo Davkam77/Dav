@@ -2809,3 +2809,206 @@
 2025-05-05T01:48:36.320Z - INFO - ✅ Добавлено: RAG-Based Chatbot Developer Using Langchain Technologies ($50)
 2025-05-05T01:48:36.323Z - INFO - 📦 Сохранено в upwork.json
 2025-05-05T01:48:36.326Z - INFO - 📴 Закрытие браузера
+2025-05-05T16:33:45.438Z - INFO - 🚀 Запуск Puppeteer для Upwork
+2025-05-05T16:33:45.438Z - INFO - 🚀 Запуск Puppeteer
+2025-05-05T16:33:46.754Z - INFO - 🌐 Переход на: https://www.upwork.com/nx/jobs/search/?q=ai
+2025-05-05T16:33:46.949Z - INFO - ✅ Cookies загружены
+2025-05-05T16:33:53.741Z - INFO - 🟢 Открыт сайт guru.com
+2025-05-05T16:33:54.833Z - INFO - 📥 Ждём результаты
+2025-05-05T16:33:57.849Z - INFO - 📜 Прокрутили страницу вниз
+2025-05-05T16:33:58.947Z - INFO - 📜 Прокрутили страницу вниз
+2025-05-05T16:33:59.931Z - INFO - 🧲 Найдено карточек: 9
+2025-05-05T16:34:00.473Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105485
+2025-05-05T16:34:01.030Z - INFO - 🔗 Найдено ссылок: 10
+2025-05-05T16:34:03.716Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/Build-and-run-sales-automation-and-span-class-highlight-span-get-subscribers_~021919430053216189244/?referrer_url_path=/nx/search/jobs/
+2025-05-05T16:34:10.793Z - INFO - ⛔ Пропущено: $25 < $50
+2025-05-05T16:34:11.279Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105482
+2025-05-05T16:34:15.208Z - INFO - ⛔ Пропущено: $3 < $50
+2025-05-05T16:34:17.974Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/span-class-highlight-span-Consultant-Needed-for-Company-Optimization_~021919429536389856060/?referrer_url_path=/nx/search/jobs/
+2025-05-05T16:34:21.554Z - INFO - ✅ Добавлено: AI Powered Doctor & Lab Consultation ($250)
+2025-05-05T16:34:21.936Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105454
+2025-05-05T16:34:29.136Z - INFO - ⛔ Пропущено: $30 < $50
+2025-05-05T16:34:31.855Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/span-class-highlight-span-Content-Automation-Workflow-Development_~021919429481746055260/?referrer_url_path=/nx/search/jobs/
+2025-05-05T16:34:32.234Z - INFO - ✅ Добавлено: AI Video Production ($735)
+2025-05-05T16:34:32.629Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105455
+2025-05-05T16:34:43.000Z - INFO - ✅ Добавлено: 🐞 BUGG: AI-Powered Floating Bug Reporti ($250)
+2025-05-05T16:34:43.104Z - INFO - ⛔ Пропущено: $20 < $50
+2025-05-05T16:34:43.564Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105441
+2025-05-05T16:34:44.550Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/Build-Python-Script-Extract-Risk-Data-from-Policy-Texts-Modular-LLM-Ready_~021919425486346538559/?referrer_url_path=/nx/search/jobs/
+2025-05-05T16:34:53.814Z - INFO - ⛔ Пропущено: $25 < $50
+2025-05-05T16:34:54.218Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105308
+2025-05-05T16:34:56.172Z - INFO - ✅ Добавлено: Build Python Script to Extract Risk Data from Policy Texts (Modular, LLM-Ready) ($400)
+2025-05-05T16:34:57.500Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/Snipeit_~021919429150787308835/?referrer_url_path=/nx/search/jobs/
+2025-05-05T16:35:04.452Z - INFO - ✅ Добавлено: Domain registration and hosting website ($250)
+2025-05-05T16:35:04.869Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105283
+2025-05-05T16:35:08.494Z - INFO - ⛔ Пропущено: $5 < $50
+2025-05-05T16:35:10.641Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/Build-Python-Tool-Audit-Text-Using-Folder-Risk-JSONs-and-Generate-HTML-Report_~021919428930325510972/?referrer_url_path=/nx/search/jobs/
+2025-05-05T16:35:15.150Z - INFO - ⛔ Пропущено: $25 < $50
+2025-05-05T16:35:15.566Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105295
+2025-05-05T16:35:22.043Z - INFO - ✅ Добавлено: Build Python Tool to Audit Text Using Folder of Risk JSONs and Generate HTML Report ($400)
+2025-05-05T16:35:25.124Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/Build-and-Integrate-span-class-highlight-span-Features-LLM-LangChain-Vector_~021919428572388592931/?referrer_url_path=/nx/search/jobs/
+2025-05-05T16:35:26.380Z - INFO - ⛔ Пропущено: $2.5 < $50
+2025-05-05T16:35:27.347Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105169
+2025-05-05T16:35:36.334Z - INFO - ⛔ Пропущено: $40 < $50
+2025-05-05T16:35:37.745Z - INFO - ✅ Добавлено: Simple AI Image Creator using ChatGPT ($250)
+2025-05-05T16:35:37.794Z - INFO - 📦 Результаты сохранены
+2025-05-05T16:35:37.798Z - INFO - 📴 Закрытие браузера
+2025-05-05T16:35:37.832Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/span-class-highlight-span-Obsessed-Automation-Engineer-for-n8n-LLM-Integrations_~021919428402246651171/?referrer_url_path=/nx/search/jobs/
+2025-05-05T16:35:49.034Z - INFO - ⛔ Пропущено: $25 < $50
+2025-05-05T16:35:50.827Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/Construction-Software-Development-Engineer-Needed_~021919428115459086166/?referrer_url_path=/nx/search/jobs/
+2025-05-05T16:36:02.095Z - INFO - ⛔ Пропущено: $30 < $50
+2025-05-05T16:36:03.633Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/Coder-Needed-Troubleshoot-Supabase-Loveable-Dev-APP_~021919427853079039551/?referrer_url_path=/nx/search/jobs/
+2025-05-05T16:36:14.906Z - INFO - ⛔ Пропущено: $25 < $50
+2025-05-05T16:36:14.909Z - INFO - 📦 Сохранено в upwork.json
+2025-05-05T16:36:14.911Z - INFO - 📴 Закрытие браузера
+2025-05-05T16:41:14.960Z - INFO - 🚀 Запуск Puppeteer для Upwork
+2025-05-05T16:41:14.960Z - INFO - 🚀 Запуск Puppeteer
+2025-05-05T16:41:15.683Z - INFO - 🌐 Переход на: https://www.upwork.com/nx/jobs/search/?q=ai
+2025-05-05T16:41:15.791Z - INFO - ✅ Cookies загружены
+2025-05-05T16:41:24.021Z - INFO - 🟢 Открыт сайт guru.com
+2025-05-05T16:41:25.133Z - INFO - 📥 Ждём результаты
+2025-05-05T16:41:28.146Z - INFO - 📜 Прокрутили страницу вниз
+2025-05-05T16:41:30.189Z - INFO - 🧲 Найдено карточек: 9
+2025-05-05T16:41:30.699Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105485
+2025-05-05T16:41:40.867Z - INFO - ⛔ Пропущено: $25 < $50
+2025-05-05T16:41:41.566Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105482
+2025-05-05T16:41:51.728Z - INFO - ✅ Добавлено: AI Powered Doctor & Lab Consultation ($250)
+2025-05-05T16:41:52.130Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105454
+2025-05-05T16:42:02.343Z - INFO - ✅ Добавлено: AI Video Production ($735)
+2025-05-05T16:42:02.756Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105455
+2025-05-05T16:42:12.942Z - INFO - ✅ Добавлено: 🐞 BUGG: AI-Powered Floating Bug Reporti ($250)
+2025-05-05T16:42:13.301Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105441
+2025-05-05T16:42:15.686Z - ERROR - ❌ Ошибка: Navigation timeout of 60000 ms exceeded
+2025-05-05T16:42:15.688Z - INFO - 📴 Закрытие браузера
+2025-05-05T16:42:23.442Z - INFO - ⛔ Пропущено: $25 < $50
+2025-05-05T16:42:23.814Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105308
+2025-05-05T16:42:33.971Z - INFO - ✅ Добавлено: Domain registration and hosting website ($250)
+2025-05-05T16:42:34.410Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105283
+2025-05-05T16:42:44.561Z - INFO - ⛔ Пропущено: $25 < $50
+2025-05-05T16:42:45.505Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105295
+2025-05-05T16:42:55.673Z - INFO - ⛔ Пропущено: $2.5 < $50
+2025-05-05T16:42:56.095Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105169
+2025-05-05T16:43:06.273Z - INFO - ✅ Добавлено: Simple AI Image Creator using ChatGPT ($250)
+2025-05-05T16:43:06.275Z - INFO - 📦 Результаты сохранены
+2025-05-05T16:43:06.276Z - INFO - 📴 Закрытие браузера
+2025-05-05T16:49:54.503Z - INFO - 🚀 Запуск Puppeteer для Upwork
+2025-05-05T16:49:54.498Z - INFO - 🚀 Запуск Puppeteer
+2025-05-05T16:49:55.088Z - INFO - 🌐 Переход на: https://www.upwork.com/nx/jobs/search/?q=ai
+2025-05-05T16:49:55.327Z - INFO - ✅ Cookies загружены
+2025-05-05T16:50:03.329Z - INFO - 🟢 Открыт сайт guru.com
+2025-05-05T16:50:04.379Z - INFO - 📥 Ждём результаты
+2025-05-05T16:50:07.388Z - INFO - 📜 Прокрутили страницу вниз
+2025-05-05T16:50:07.898Z - INFO - 📜 Прокрутили страницу вниз
+2025-05-05T16:50:09.443Z - INFO - 🧲 Найдено карточек: 9
+2025-05-05T16:50:09.896Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105485
+2025-05-05T16:50:09.953Z - INFO - 🔗 Найдено ссылок: 10
+2025-05-05T16:50:13.151Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/Market-Analysis-for-span-class-highlight-span-Powered-Chat-Collaboration-Product_~021919434075833519041/?referrer_url_path=/nx/search/jobs/
+2025-05-05T16:50:20.131Z - INFO - ⛔ Пропущено: $25 < $50
+2025-05-05T16:50:22.473Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105482
+2025-05-05T16:50:24.094Z - INFO - ⛔ Пропущено: $2 < $50
+2025-05-05T16:50:27.149Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/Seeking-Experienced-Unity-Developer-with-Generative-span-class-highlight-span-Expertise_~021908976854874971812/?referrer_url_path=/nx/search/jobs/
+2025-05-05T16:50:32.672Z - INFO - ✅ Добавлено: AI Powered Doctor & Lab Consultation ($250)
+2025-05-05T16:50:33.327Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105454
+2025-05-05T16:50:37.961Z - INFO - ✅ Добавлено: Seeking Experienced Unity Developer with Generative AI Expertise ($5000)
+2025-05-05T16:50:40.813Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/Write-Backend-PHP-script-that-pulls-nutrition-data-from-span-class-highlight-span-API-and-returns-json_~021919432703668981027/?referrer_url_path=/nx/search/jobs/
+2025-05-05T16:50:43.524Z - INFO - ✅ Добавлено: AI Video Production ($735)
+2025-05-05T16:50:43.916Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105455
+2025-05-05T16:50:51.528Z - INFO - ✅ Добавлено: Write Backend PHP script that pulls nutrition data from an AI API and returns a json. ($300)
+2025-05-05T16:50:54.149Z - INFO - ✅ Добавлено: 🐞 BUGG: AI-Powered Floating Bug Reporti ($250)
+2025-05-05T16:50:54.163Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/span-class-highlight-span-Artist-Clothing-Designer-for-Futuristic-Cyberpunk-world_~021919432547908516668/?referrer_url_path=/nx/search/jobs/
+2025-05-05T16:50:54.586Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105441
+2025-05-05T16:51:04.712Z - INFO - ⛔ Пропущено: $25 < $50
+2025-05-05T16:51:04.938Z - INFO - ⛔ Пропущено: $20 < $50
+2025-05-05T16:51:05.132Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105308
+2025-05-05T16:51:06.396Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/Full-Stack-Software-Engineer-for-Mobile-App-Development_~021919431592216169763/?referrer_url_path=/nx/search/jobs/
+2025-05-05T16:51:15.306Z - INFO - ✅ Добавлено: Domain registration and hosting website ($250)
+2025-05-05T16:51:15.754Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105283
+2025-05-05T16:51:17.292Z - INFO - ✅ Добавлено: Без названия ($20000)
+2025-05-05T16:51:19.690Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/GoHighLevel-Expert_~021919431332235639612/?referrer_url_path=/nx/search/jobs/
+2025-05-05T16:51:25.920Z - INFO - ⛔ Пропущено: $25 < $50
+2025-05-05T16:51:26.429Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105295
+2025-05-05T16:51:30.596Z - INFO - ✅ Добавлено: GoHighLevel Expert ($200)
+2025-05-05T16:51:33.364Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/span-class-highlight-span-Video-Creator-for-YouTube-Series_~021919431296353368892/?referrer_url_path=/nx/search/jobs/
+2025-05-05T16:51:36.592Z - INFO - ⛔ Пропущено: $2.5 < $50
+2025-05-05T16:51:37.271Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105169
+2025-05-05T16:51:44.176Z - INFO - ✅ Добавлено: AI Video Creator for YouTube Series ($100)
+2025-05-05T16:51:46.483Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/Notion-Expert-Workflow-Automation-Specialist_~021919431175590368036/?referrer_url_path=/nx/search/jobs/
+2025-05-05T16:51:47.665Z - INFO - ✅ Добавлено: Simple AI Image Creator using ChatGPT ($250)
+2025-05-05T16:51:47.671Z - INFO - 📦 Результаты сохранены
+2025-05-05T16:51:47.673Z - INFO - 📴 Закрытие браузера
+2025-05-05T16:51:57.435Z - INFO - ✅ Добавлено: Notion Expert | Workflow & Automation Specialist ($404)
+2025-05-05T16:51:58.811Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/Director-Salesforce-Marketing-Commerce-76174_~021919431146737750820/?referrer_url_path=/nx/search/jobs/
+2025-05-05T16:52:09.428Z - INFO - ⛔ Пропущено: $10 < $50
+2025-05-05T16:52:12.119Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/One-page-messaging-web-app-span-class-highlight-span-code-only_~021919431013807049665/?referrer_url_path=/nx/search/jobs/
+2025-05-05T16:52:22.854Z - INFO - ✅ Добавлено: One page messaging web app (AI code only) ($100)
+2025-05-05T16:52:22.858Z - INFO - 📦 Сохранено в upwork.json
+2025-05-05T16:52:22.859Z - INFO - 📴 Закрытие браузера
+2025-05-05T17:07:15.811Z - INFO - 🚀 Запуск Puppeteer
+2025-05-05T17:07:15.813Z - INFO - 🚀 Запуск Puppeteer для Upwork
+2025-05-05T17:07:16.745Z - INFO - 🌐 Переход на: https://www.upwork.com/nx/jobs/search/?q=ai
+2025-05-05T17:07:16.960Z - INFO - ✅ Cookies загружены
+2025-05-05T17:07:19.812Z - ERROR - ❌ Ошибка: Navigating frame was detached
+2025-05-05T17:07:19.813Z - INFO - 📴 Закрытие браузера
+2025-05-05T17:07:22.956Z - ERROR - ❌ Ошибка: Navigating frame was detached
+2025-05-05T17:07:22.964Z - INFO - 📴 Закрытие браузера
+2025-05-05T17:17:09.927Z - INFO - 🚀 Запуск Puppeteer
+2025-05-05T17:17:09.927Z - INFO - 🚀 Запуск Puppeteer для Upwork
+2025-05-05T17:17:10.707Z - INFO - 🌐 Переход на: https://www.upwork.com/nx/jobs/search/?q=ai
+2025-05-05T17:17:10.854Z - INFO - ✅ Cookies загружены
+2025-05-05T17:17:19.838Z - INFO - 🟢 Открыт сайт guru.com
+2025-05-05T17:17:20.855Z - INFO - 📥 Ждём результаты
+2025-05-05T17:17:23.968Z - INFO - 📜 Прокрутили страницу вниз
+2025-05-05T17:17:26.042Z - INFO - 🧲 Найдено карточек: 9
+2025-05-05T17:17:26.686Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105485
+2025-05-05T17:17:31.346Z - INFO - 📜 Прокрутили страницу вниз
+2025-05-05T17:17:33.433Z - INFO - 🔗 Найдено ссылок: 10
+2025-05-05T17:17:36.878Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/App-find-partner-improve-their-health-together-with-span-class-highlight-span-advisor_~021919441099112905532/?referrer_url_path=/nx/search/jobs/
+2025-05-05T17:17:37.230Z - INFO - ⛔ Пропущено: $25 < $50
+2025-05-05T17:17:37.835Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105482
+2025-05-05T17:17:49.666Z - INFO - ✅ Добавлено: AI Powered Doctor & Lab Consultation ($250)
+2025-05-05T17:17:53.957Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105454
+2025-05-05T17:17:56.541Z - INFO - ⛔ Пропущено: $20 < $50
+2025-05-05T17:17:59.375Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/Quantitative-Researcher-span-class-highlight-span-Developer-Build-Systematic-Algo-Based-Trading-Strategy_~021919440948464850774/?referrer_url_path=/nx/search/jobs/
+2025-05-05T17:18:04.395Z - INFO - ✅ Добавлено: AI Video Production ($735)
+2025-05-05T17:18:04.856Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105455
+2025-05-05T17:18:11.322Z - INFO - ⛔ Пропущено: $35 < $50
+2025-05-05T17:18:14.143Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/span-class-highlight-span-Powered-Avatar-for-Regulated-eLearning-Support_~021919440611529259836/?referrer_url_path=/nx/search/jobs/
+2025-05-05T17:18:15.467Z - INFO - ✅ Добавлено: 🐞 BUGG: AI-Powered Floating Bug Reporti ($250)
+2025-05-05T17:18:16.090Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105441
+2025-05-05T17:18:25.917Z - INFO - ⛔ Пропущено: $30 < $50
+2025-05-05T17:18:26.428Z - INFO - ⛔ Пропущено: $25 < $50
+2025-05-05T17:18:26.990Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105308
+2025-05-05T17:18:27.464Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/Elite-Python-Expert-Backend-Developer_~021919440038494458660/?referrer_url_path=/nx/search/jobs/
+2025-05-05T17:18:37.326Z - INFO - ✅ Добавлено: Domain registration and hosting website ($250)
+2025-05-05T17:18:37.822Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105283
+2025-05-05T17:18:42.048Z - INFO - ⛔ Пропущено: $12 < $50
+2025-05-05T17:18:43.876Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/Audit-and-Optimize-Custom-GPT-for-Company-Acquisitions_~021919439599002078145/?referrer_url_path=/nx/search/jobs/
+2025-05-05T17:18:48.218Z - INFO - ⛔ Пропущено: $25 < $50
+2025-05-05T17:18:48.959Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105295
+2025-05-05T17:18:55.536Z - INFO - ⛔ Пропущено: $35 < $50
+2025-05-05T17:18:57.121Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/looking-for-items-that-make-money-Looking-for-Innovative-Developers_~021919438990387596225/?referrer_url_path=/nx/search/jobs/
+2025-05-05T17:18:59.405Z - INFO - ⛔ Пропущено: $2.5 < $50
+2025-05-05T17:19:00.464Z - INFO - 📄 Чтение карточки: https://www.guru.com/work/detail/2105169
+2025-05-05T17:19:08.870Z - INFO - ✅ Добавлено: I'm looking for items that make money: Looking for Innovative Developers. ($400)
+2025-05-05T17:19:10.911Z - INFO - ✅ Добавлено: Simple AI Image Creator using ChatGPT ($250)
+2025-05-05T17:19:10.915Z - INFO - 📦 Результаты сохранены
+2025-05-05T17:19:10.919Z - INFO - 📴 Закрытие браузера
+2025-05-05T17:19:12.435Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/Looking-for-wordpress-pro-work-existing-clothing-online-store_~021919438077091299420/?referrer_url_path=/nx/search/jobs/
+2025-05-05T17:19:24.040Z - INFO - ⛔ Пропущено: $15 < $50
+2025-05-05T17:19:27.338Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/span-class-highlight-span-social-media-web-site-lawyer-summary_~021919438072302603555/?referrer_url_path=/nx/search/jobs/
+2025-05-05T17:19:40.749Z - INFO - ✅ Добавлено: AI social media web site(lawyer, summary) ($400)
+2025-05-05T17:19:45.315Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/span-class-highlight-span-Search-Specialist-Needed-for-Immediate-Start_~021919437984292131620/?referrer_url_path=/nx/search/jobs/
+2025-05-05T17:19:56.923Z - INFO - ⛔ Пропущено: $5 < $50
+2025-05-05T17:19:59.041Z - INFO - 📄 Чтение карточки: https://www.upwork.com/jobs/Build-Custom-Notion-Workspace_~021919437261115030332/?referrer_url_path=/nx/search/jobs/
+2025-05-05T17:20:10.541Z - INFO - ✅ Добавлено: Build Custom Notion Workspace ($250)
+2025-05-05T17:20:10.546Z - INFO - 📦 Сохранено в upwork.json
+2025-05-05T17:20:10.549Z - INFO - 📴 Закрытие браузера
+2025-05-06T07:24:28.624Z - INFO - 🚀 Запуск Puppeteer для Upwork
+2025-05-06T07:24:28.624Z - INFO - 🚀 Запуск Puppeteer для Guru
+2025-05-06T07:24:29.769Z - INFO - 🌐 Переход на: https://www.upwork.com/nx/jobs/search/?q=ai
+2025-05-06T07:24:29.976Z - INFO - ✅ Cookies загружены
+2025-05-06T07:24:29.977Z - INFO - 🌐 Переход на: https://www.guru.com/d/jobs/q/ai/
+2025-05-06T07:24:33.062Z - ERROR - ❌ Ошибка: net::ERR_NAME_NOT_RESOLVED at https://www.guru.com/d/jobs/q/ai/
+2025-05-06T07:24:33.063Z - INFO - 📴 Закрытие браузера
+2025-05-06T07:24:33.204Z - ERROR - ❌ Ошибка: net::ERR_NAME_NOT_RESOLVED at https://www.upwork.com/nx/jobs/search/?q=ai
+2025-05-06T07:24:33.205Z - INFO - 📴 Закрытие браузера

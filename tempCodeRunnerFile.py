@@ -11,27 +11,35 @@ from flask_login import LoginManager, login_required, current_user
 from dotenv import load_dotenv
 from openai import OpenAI
 from users.models import UserFilter, db, Favorite, User, Job, ChatMessage
-from flask_migrate import Migrate
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.interval import IntervalTrigger
+from flask_migrate import Migrate  
 
+
+# 📍 Путь до проекта
 basedir = os.path.abspath(os.path.dirname(__file__))
+
+# ✅ Загружаем .env
 load_dotenv(dotenv_path=os.path.join(basedir, '.env'))
 
+# 🔐 Инициализация OpenAI
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
-    raise ValueError("OPENAI_API_KEY не найден в .env")
+    raise ValueError("❌ OPENAI_API_KEY не найден в .env")
 client = OpenAI(api_key=OPENAI_API_KEY)
 
+# 📦 Ключи
 UNSPLASH_ACCESS_KEY = os.getenv("UNSPLASH_ACCESS_KEY")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
+# 🚀 Flask-приложение
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(basedir, 'db.sqlite3')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# 💬 SocketIO
 socketio = SocketIO(app)
+
+# 🔐 Flask-Login
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "users.login"
@@ -40,29 +48,23 @@ login_manager.login_view = "users.login"
 def load_user(user_id):
     return db.session.get(User, int(user_id))
 
+# Инициализация базы данных
 db.init_app(app)
-
-class AutoParseConfig(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    chat_id = db.Column(db.String(50), nullable=False)
-    product = db.Column(db.String(100), nullable=False)
-    min_price = db.Column(db.Float, nullable=False, default=0)
-    max_price = db.Column(db.Float, nullable=True)
-    region = db.Column(db.String(100), nullable=True)
-    active = db.Column(db.Boolean, default=True)
-
 with app.app_context():
     db.create_all()
 
-migrate = Migrate(app, db)
+# Инициализация миграций
+migrate = Migrate(app, db)  # Добавляем инициализацию Migrate
+
+# Регистрация blueprints
 from users.routes import users_bp
 app.register_blueprint(users_bp, url_prefix='/auth')
 
-online_users = set()
-scheduler = BackgroundScheduler()
-scheduler.start()
 
+# Инициализация событий чата
+online_users = set()
+
+# Вспомогательные функции
 def load_global_favorites():
     if hasattr(load_global_favorites, 'cache'):
         return load_global_favorites.cache
@@ -82,10 +84,10 @@ def save_global_favorites(data):
 
 def extract_budget(task):
     try:
-        budget_str = str(task.get('budget', '')).replace("$", "").replace(",", "").split("-")[0].strip()
+        budget_str = str(task.budget).replace("$", "").replace(",", "").split("-")[0].strip()
         return float(budget_str) if budget_str else 0
     except Exception as e:
-        app.logger.error(f"Ошибка парсинга бюджета: {task.get('budget', '')} — {e}")
+        app.logger.error(f"Ошибка парсинга бюджета: {task.budget} — {e}")
         return 0
 
 def get_unsplash_background():
@@ -99,78 +101,23 @@ def get_unsplash_background():
         app.logger.error(f"Ошибка запроса к Unsplash: {e}")
         return url_for('static', filename='default.jpg')
 
-def send_telegram_message(chat_id, message):
+def send_telegram_message(chat_id, title, link):
     if not TELEGRAM_BOT_TOKEN:
         app.logger.warning("Telegram token не найден в .env")
         return
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    payload = {"chat_id": chat_id, "text": message, "parse_mode": "HTML"}
+    payload = {
+        "chat_id": chat_id,
+        "text": f"📢 Новое задание:\n{title}\n🔗 {link}",
+        "parse_mode": "HTML"
+    }
     try:
         response = requests.post(url, json=payload, timeout=5)
         response.raise_for_status()
     except Exception as e:
         app.logger.error(f"Ошибка отправки Telegram: {e}")
 
-def run_auto_parse():
-    configs = AutoParseConfig.query.filter_by(active=True).all()
-    for config in configs:
-        user = User.query.get(config.user_id)
-        if not user:
-            continue
-        query = f"{config.product} {int(config.min_price)}"
-        jobs = []
-        base_path = "C:/Users/Mane/Desktop/Python/freelance-monitor/results"
-        try:
-            def run_parser(script):
-                subprocess.run(["node", script, config.product, str(config.min_price), str(config.max_price or ""), config.region or ""], check=True)
-            
-            upwork_thread = Thread(target=run_parser, args=("C:/Users/Mane/Desktop/Python/freelance-monitor/parsers/puppeteer_upwork.js",))
-            guru_thread = Thread(target=run_parser, args=("C:/Users/Mane/Desktop/Python/freelance-monitor/parsers/puppeteer_guru.js",))
-            upwork_thread.start()
-            guru_thread.start()
-            upwork_thread.join()
-            guru_thread.join()
-
-            for filename in ["upwork.json", "guru.json"]:
-                full_path = os.path.join(base_path, filename)
-                if os.path.exists(full_path):
-                    with open(full_path, encoding='utf-8') as f:
-                        file_jobs = json.load(f)
-                        app.logger.info(f"Автопарсинг: Загружено {len(file_jobs)} заказов из {filename}")
-                        jobs.extend(file_jobs)
-                else:
-                    app.logger.warning(f"Файл {full_path} не найден")
-        except Exception as e:
-            app.logger.error(f"Ошибка автопарсинга для конфигурации {config.id}: {e}")
-            continue
-
-        for job in jobs:
-            budget = extract_budget(job)
-            job_region = job.get('region', '').lower()
-            if (config.min_price <= budget and
-                (not config.max_price or budget <= config.max_price) and
-                (not config.region or config.region.lower() in job_region) and
-                job.get("description") and job.get("link") and
-                not Job.query.filter_by(link=job['link']).first()):
-                new_job = Job(
-                    title=job.get("title", "Без названия"),
-                    description=job.get("description", ""),
-                    budget=job.get("budget", ""),
-                    link=job.get("link"),
-                    status="new",
-                    user_id=config.user_id
-                )
-                db.session.add(new_job)
-                message = f"📢 Новый заказ:\n{job.get('title', 'Без названия')}\n💰 Бюджет: {job.get('budget', 'Не указан')}\n🌍 Регион: {job.get('region', 'Не указан')}\n🔗 {job.get('link')}"
-                send_telegram_message(config.chat_id, message)
-        try:
-            db.session.commit()
-        except Exception as e:
-            app.logger.error(f"Ошибка сохранения автопарсинга: {e}")
-            db.session.rollback()
-
-scheduler.add_job(run_auto_parse, trigger=IntervalTrigger(minutes=10), id='auto_parse_job')
-
+# Роуты
 @app.route('/')
 def welcome():
     if not current_user.is_authenticated:
@@ -189,13 +136,11 @@ def home():
 @login_required
 def index():
     tasks = Job.query.filter_by(user_id=current_user.id, status="new").order_by(Job.budget.desc()).all()
-    auto_parse_config = AutoParseConfig.query.filter_by(user_id=current_user.id).first()
     return render_template(
         "index.html",
         telegram_id=current_user.telegram_id or "",
         background=get_unsplash_background(),
-        tasks=tasks,
-        auto_parse_config=auto_parse_config
+        tasks=tasks
     )
 
 @app.route("/favorites")
@@ -215,6 +160,7 @@ def simplify_api():
     query = data.get("query")
     if not query:
         return jsonify({"error": "No query provided"}), 400
+
     try:
         correction = client.chat.completions.create(
             model="gpt-3.5-turbo",
@@ -225,6 +171,7 @@ def simplify_api():
             temperature=0.3,
             max_tokens=500
         ).choices[0].message.content.strip()
+
         task = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
@@ -234,6 +181,7 @@ def simplify_api():
             temperature=0.5,
             max_tokens=800
         ).choices[0].message.content.strip()
+
         return jsonify([{
             "title": "Сформированное Техническое Задание",
             "description": task,
@@ -248,7 +196,10 @@ def simplify_api():
 @app.route("/my_tasks")
 @login_required
 def my_tasks():
-    tasks = Job.query.filter(Job.user_id == current_user.id, Job.status == "in_progress").order_by(Job.budget.desc()).all()
+    tasks = Job.query.filter(
+        Job.user_id == current_user.id,
+        Job.status == "in_progress"
+    ).order_by(Job.budget.desc()).all()
     return render_template("my_tasks.html", tasks=tasks, background=get_unsplash_background())
 
 @app.route("/admin_dashboard")
@@ -257,9 +208,22 @@ def admin_dashboard():
     if current_user.role != "admin":
         return redirect(url_for("index"))
     users = User.query.all()
-    analytics = [{"username": user.username, "taken": Job.query.filter(Job.user_id == user.id).count(), "done": Job.query.filter(Job.user_id == user.id, Job.status == "done").count()} for user in users]
+    analytics = [
+        {
+            "username": user.username,
+            "taken": Job.query.filter(Job.user_id == user.id).count(),
+            "done": Job.query.filter(Job.user_id == user.id, Job.status == "done").count()
+        } for user in users
+    ]
     jobs = Job.query.order_by(Job.id.desc()).all()
-    return render_template("admin_dashboard.html", background=get_unsplash_background(), users=users, analytics=analytics, online_users=list(online_users), jobs=jobs)
+    return render_template(
+        "admin_dashboard.html",
+        background=get_unsplash_background(),
+        users=users,
+        analytics=analytics,
+        online_users=list(online_users),
+        jobs=jobs
+    )
 
 @app.route("/tasks")
 @login_required
@@ -289,8 +253,15 @@ def complete_job(job_id):
     if job.status == "in_progress":
         job.status = "done"
         db.session.commit()
-        socketio.emit("task_completed", {"id": job.id, "title": job.title, "description": job.description})
-        socketio.emit("chat_message", {"msg": f"✅ {current_user.username} завершил задание: {job.title}", "time": datetime.now().strftime("%H:%M")})
+        socketio.emit("task_completed", {
+            "id": job.id,
+            "title": job.title,
+            "description": job.description
+        })
+        socketio.emit("chat_message", {
+            "msg": f"✅ {current_user.username} завершил задание: {job.title}",
+            "time": datetime.now().strftime("%H:%M")
+        })
     return redirect(url_for("my_tasks"))
 
 @app.route("/assign", methods=["POST"])
@@ -312,56 +283,35 @@ def assign_job():
 @login_required
 def search():
     data = request.get_json()
-    query = data.get("query", "").strip()
-    input_min_price = data.get("min_price", "").strip()
-    input_max_price = data.get("max_price", "").strip()
-    input_region = data.get("region", "").strip()
-
-    # Получаем конфиг по умолчанию
-    config = AutoParseConfig.query.filter_by(user_id=current_user.id).first()
-    min_price = input_min_price or str(config.min_price if config and config.min_price else "0")
-    max_price = input_max_price or str(config.max_price if config and config.max_price else "")
-    region = input_region or (config.region if config and config.region else "")
-
-    # Выделяем тему из запроса
+    query = data.get("query", "")
     parts = query.split()
     topic = " ".join(parts[:-1]) if parts and parts[-1].isdigit() else query
-    if parts and parts[-1].isdigit():
-        min_price = parts[-1]  # переопределим, если пользователь ввел через запрос
+    min_price = parts[-1] if parts and parts[-1].isdigit() else "0"
 
-    jobs = []
-    base_path = "C:/Users/Mane/Desktop/Python/freelance-monitor/results"
+    def run_parser(script):
+        subprocess.run(["node", script, topic, min_price], check=True)
+
     try:
-        def run_parser(script):
-            subprocess.run(["node", script, topic, min_price, max_price, region], check=True)
-
         upwork_thread = Thread(target=run_parser, args=("C:/Users/Mane/Desktop/Python/freelance-monitor/parsers/puppeteer_upwork.js",))
         guru_thread = Thread(target=run_parser, args=("C:/Users/Mane/Desktop/Python/freelance-monitor/parsers/puppeteer_guru.js",))
         upwork_thread.start()
         guru_thread.start()
         upwork_thread.join()
         guru_thread.join()
-
-        for filename in ["upwork.json", "guru.json"]:
-            full_path = os.path.join(base_path, filename)
-            if os.path.exists(full_path):
-                with open(full_path, encoding='utf-8') as f:
-                    file_jobs = json.load(f)
-                    app.logger.info(f"Загружено {len(file_jobs)} заказов из {filename}")
-                    jobs.extend(file_jobs)
-            else:
-                app.logger.warning(f"Файл {full_path} не найден")
     except Exception as e:
         app.logger.error(f"Ошибка парсеров: {e}")
-        return jsonify({"error": f"Ошибка парсинга: {str(e)}"}), 500
+        return jsonify({"error": "Парсеры не запустились"}), 500
 
-    # Фильтрация и сохранение
+    jobs = []
+    base_path = "C:/Users/Mane/Desktop/Python/freelance-monitor/results"
+    for filename in ["upwork.json", "guru.json"]:
+        full_path = os.path.join(base_path, filename)
+        if os.path.exists(full_path):
+            with open(full_path, encoding='utf-8') as f:
+                jobs.extend(json.load(f))
+
     for job in jobs:
-        budget = extract_budget(job)
-        job_region = job.get('region', '').lower()
-        if (min_price and budget < float(min_price)) or (max_price and budget > float(max_price)) or (region and region.lower() not in job_region):
-            continue
-        if job.get("description") and job.get("link") and not Job.query.filter_by(link=job['link']).first():
+        if job.get("description") and not Job.query.filter_by(link=job['link']).first():
             new_job = Job(
                 title=job.get("title", "Без названия"),
                 description=job.get("description", ""),
@@ -371,23 +321,28 @@ def search():
                 user_id=current_user.id
             )
             db.session.add(new_job)
+    db.session.commit()
 
-    try:
-        db.session.commit()
-        app.logger.info("Новые заказы сохранены в базу данных")
-    except Exception as e:
-        app.logger.error(f"Ошибка сохранения в базу данных: {e}")
-        db.session.rollback()
-        return jsonify({"error": "Ошибка сохранения данных"}), 500
-
-    updated_jobs = [{"id": job.id, "title": job.title, "budget": job.budget or "Не указан", "description": job.description, "link": job.link} for job in Job.query.filter_by(user_id=current_user.id, status="new").order_by(Job.id.desc()).all()]
-    app.logger.info(f"Возвращено {len(updated_jobs)} заказов для пользователя {current_user.id}")
+    updated_jobs = [{
+        "id": job.id,
+        "title": job.title,
+        "budget": job.budget,
+        "description": job.description,
+        "link": job.link
+    } for job in Job.query.filter(
+    Job.user_id == current_user.id,
+    Job.link.in_([j['link'] for j in jobs])
+)
+.all()]
     return jsonify(updated_jobs)
 
 @app.route("/completions")
 @login_required
 def completions():
-    tasks = Job.query.filter(Job.user_id == current_user.id, Job.status == "done").order_by(Job.budget.desc()).all()
+    tasks = Job.query.filter(
+        Job.user_id == current_user.id,
+        Job.status == "done"
+    ).order_by(Job.budget.desc()).all()
     return render_template("completions.html", tasks=tasks, background=get_unsplash_background())
 
 @app.route('/api/favorite', methods=['POST'])
@@ -415,48 +370,28 @@ def save_filter():
     min_price = data.get('min_price', 0)
     category = data.get('category', '')
     telegram_id = data.get('telegram_id', '').strip()
+
     user_filter = UserFilter.query.filter_by(user_id=current_user.id).first() or UserFilter(user_id=current_user.id)
     user_filter.keywords = keywords
     user_filter.min_price = min_price
     user_filter.category = category
     db.session.add(user_filter)
+
     if telegram_id:
         current_user.telegram_id = telegram_id
         db.session.add(current_user)
     db.session.commit()
     return jsonify({"status": "saved"})
 
-@app.route('/save_auto_parse', methods=['POST'])
-@login_required
-def save_auto_parse():
-    data = request.get_json()
-    chat_id = data.get('chat_id', '').strip()
-    product = data.get('product', '').strip()
-    min_price = float(data.get('min_price', 0))
-    max_price = float(data.get('max_price', 0)) if data.get('max_price') else None
-    region = data.get('region', '').strip()
-    if not chat_id or not product:
-        return jsonify({"error": "Chat ID и название товара обязательны"}), 400
-    config = AutoParseConfig.query.filter_by(user_id=current_user.id).first() or AutoParseConfig(user_id=current_user.id)
-    config.chat_id = chat_id
-    config.product = product
-    config.min_price = min_price
-    config.max_price = max_price
-    config.region = region
-    config.active = True
-    db.session.add(config)
-    db.session.commit()
-    return jsonify({"status": "saved", "message": "Настройки автопарсинга сохранены"})
-
-@app.route('/auto_parse_settings')
-@login_required
-def auto_parse_settings():
-    auto_parse_config = AutoParseConfig.query.filter_by(user_id=current_user.id).first()
-    return render_template("auto_parse_settings.html", auto_parse_config=auto_parse_config, background=get_unsplash_background())
-
 @app.route('/active_filters')
 def get_active_filters():
-    results = [{"user_id": user.id, "telegram_id": user.telegram_id, "keywords": filt.keywords.split(',') if filt.keywords else [], "min_price": filt.min_price, "category": filt.category} for user in User.query.filter(User.telegram_id.isnot(None)).all() if (filt := UserFilter.query.filter_by(user_id=user.id).first())]
+    results = [{
+        "user_id": user.id,
+        "telegram_id": user.telegram_id,
+        "keywords": filt.keywords.split(',') if filt.keywords else [],
+        "min_price": filt.min_price,
+        "category": filt.category
+    } for user in User.query.filter(User.telegram_id.isnot(None)).all() if (filt := UserFilter.query.filter_by(user_id=user.id).first())]
     return jsonify(results)
 
 @app.route('/add_to_favorites', methods=['POST'])
@@ -473,6 +408,7 @@ def add_to_favorites():
         save_global_favorites(favorites)
     return jsonify({'message': 'Добавлено в избранное'}), 200
 
+# Запуск приложения
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
